@@ -514,6 +514,29 @@ input:focus, textarea:focus {
     transform: translateY(0)
 }
 
+
+/* team page email links */
+.team-email-inner{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    min-height:40px;
+    border-radius:11px;
+    background:#1b1c1f;
+    color:white;
+    font-weight:600;
+    font-size:.8rem;
+    padding:0 12px;
+}
+
+.team-email{
+    margin-top:auto;
+    width:95%;
+    margin-left:auto;
+    margin-right:auto;
+}
+
 /* Responsive */
 @media (max-width: 920px) {
     .hero-grid, .project-grid, .split-grid, .contact-grid {
@@ -810,25 +833,3 @@ input:focus, textarea:focus {
         font-size: 1.05rem
     }
 }
-
-.team-email-inner{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    min-height:40px;
-    border-radius:11px;
-    background:#1b1c1f;
-    color:white;
-    font-weight:600;
-    font-size:.8rem;
-    padding:0 12px;
-}
-
-.team-email{
-    margin-top:auto;
-    width:95%;
-    margin-left:auto;
-    margin-right:auto;
-}
-
