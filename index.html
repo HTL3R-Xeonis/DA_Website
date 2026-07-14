@@ -58,12 +58,117 @@
                 <img class="hero-logo" src="assets/logo_xeonis_v4_light.svg" alt="Xeonis Logo">
                 <div class="status-box">
                     <span class="status-dot"></span>
-                    <p>Projektstatus: Planungsphase</p>
+                    <p>Projektstatus: Planungsphase / Technische Planung</p>
                 </div>
             </div>
         </div>
     </section>
 
+    <section class="xn-goals" id="ziele">
+        <div class="xn-goals__inner">
+
+            <div class="xn-goals__head">
+                <p class="eyebrow"> Projektziele</p>
+                <h2 class="xn-goals__title">Was Xeonis leisten soll</h2>
+                <p class="xn-goals__intro">
+                    Mit Chaos und viel Hardware allein ist natürlich noch kein Projekt geschaffen.
+                    <br>
+                    <br>
+                    Unsere Diplomarbeit lässt sich grob in 6 Bereiche aufteilen, die gemeinsam ein System bilden: von der physischen Hardware im Rack bis zum automatisierten Aufbau von Netzwerktopologien und die Weiterverwendung dieser. Jede dieser „Bereiche“ ist ein eigener Teil unserer Diplomarbeit &ndash; wie ein eigenes Blade im Rack.
+                    <br>
+                    <br>
+                    Am Ende wollen wir eine Umgebung erschaffen, welche Hardware, Virtualisierung, Automatisierung (und Deployment), Security und LLMs miteinander vereint. Dabei wollen wir auch auf Open-source / kostenfreie Tools zurückgreifen, um zu zeigen, was alles im schulischen Rahmen möglich ist.
+                    <br>
+                    Natürlich darf am Ende auch eine entsprechende Dokumentation nicht fehlen.
+                </p>
+            </div>
+
+            <ol class="xn-rack">
+
+                <li class="xn-blade">
+                    <div class="xn-blade__row">
+                        <span class="xn-blade__led xn-blade__led--on" aria-hidden="true"></span>
+                        <span class="xn-blade__slot">BLADE&nbsp;01</span>
+                    </div>
+                    <h3 class="xn-blade__title">Hardware &amp; OS</h3>
+                    <p class="xn-blade__text">
+                        Rack, Stromversorgung und Verkabelung müssen sauber dokumentiert
+                        und über die gesamte Projektlaufzeit funktionsfähig sein.
+                    </p>
+                </li>
+
+                <li class="xn-blade">
+                    <div class="xn-blade__row">
+                        <span class="xn-blade__led xn-blade__led--on" aria-hidden="true"></span>
+                        <span class="xn-blade__slot">BLADE&nbsp;02</span>
+                    </div>
+                    <h3 class="xn-blade__title">UCS-System</h3>
+                    <p class="xn-blade__text">
+                        8 Blade-Server werden über den UCS-Manager administriert und mit
+                        passenden Service-Profiles konfiguriert - ESXi „Produktivumgebungen“ werden auf den Bladen-Servern bereitgestellt.
+                    </p>
+                </li>
+
+                <li class="xn-blade">
+                    <div class="xn-blade__row">
+                        <span class="xn-blade__led xn-blade__led--on" aria-hidden="true"></span>
+                        <span class="xn-blade__slot">BLADE&nbsp;03</span>
+                    </div>
+                    <h3 class="xn-blade__title">Virtualisierte Infrastruktur</h3>
+                    <p class="xn-blade__text">
+                        Management-, Storage/NAS- und Monitoring-VMs bilden das
+                        die Infrastruktur der virtuellen Umgebung.
+                    </p>
+                </li>
+
+                <li class="xn-blade">
+                    <div class="xn-blade__row">
+                        <span class="xn-blade__led xn-blade__led--on" aria-hidden="true"></span>
+                        <span class="xn-blade__slot">BLADE&nbsp;04</span>
+                    </div>
+                    <h3 class="xn-blade__title">TopologyBuilder</h3>
+                    <p class="xn-blade__text">
+                        Unser Kernstück: er erstellt automatisiert virtuelle
+                        Netzwerktopologien aus einem Konfigurationsfile.
+                    </p>
+                </li>
+
+                <li class="xn-blade">
+                    <div class="xn-blade__row">
+                        <span class="xn-blade__led xn-blade__led--on" aria-hidden="true"></span>
+                        <span class="xn-blade__slot">BLADE&nbsp;05</span>
+                    </div>
+                    <h3 class="xn-blade__title">Security-Pipeline &amp; Monitoring</h3>
+                    <p class="xn-blade__text">
+                        Tools wie Batfish, Lynis oder LibreNMS prüfen Konfigurationen
+                        automatisiert und fassen die Ergebnisse in einem generierten PDF-Report zusammen.
+                    </p>
+                </li>
+
+                <li class="xn-blade">
+                    <div class="xn-blade__row">
+                        <span class="xn-blade__led xn-blade__led--on" aria-hidden="true"></span>
+                        <span class="xn-blade__slot">BLADE&nbsp;06</span>
+                    </div>
+                    <h3 class="xn-blade__title">LLM-Server</h3>
+                    <p class="xn-blade__text">
+                        Ein lokal gehosteter LLM-Service wandelt geschriebene Beschreibungen einer Topologie in ein passendes
+                        Konfigurations-Datenformat um.
+                    </p>
+                </li>
+
+            </ol>
+
+            <div class="xn-goals__head" style="margin-top: 3rem;">
+                <p class="xn-goals__intro">
+                    Unser Ergebnis soll zeigen, was möglich ist mit den umfassenden Skills, welche Schüler*innen in der Netzwerktechnik erlernen, sowie der Hardware, welche in der Schule zur Verfügung steht. Wir wollen, neben dem Ziel, ein hilfreiches Tool zu schaffen, auch in der schulischen Umgebung zeigen, wie viele Dinge in der Netzwerktechnik und verwandten Bereichen zusammenhängen.
+                </p>
+            </div>
+
+        </div>
+
+
+    </section>
 
     <section class="section hardware-section">
         <div class="container">
