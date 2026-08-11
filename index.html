@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
+    <script>(function(){try{if(localStorage.getItem('xeonis-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}})();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xeonis | HTL 3 Rennweg Diplomarbeit</title>
     <meta name="description"
@@ -15,24 +16,31 @@
            Xeonis
         </a>
 
-        <button class="nav-toggle" aria-label="Navigation öffnen" aria-expanded="false">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+        <div class="nav-right">
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="team.html">Team</a></li>
+                <li><a href="impressum-kontakt.html">Impressum & Kontakt</a></li>
+            </ul>
 
-        <ul class="nav-links">
-            <li><a href="index.html" class="active">Home</a></li>
-            <li><a href="team.html">Team</a></li>
-            <li><a href="impressum-kontakt.html">Impressum & Kontakt</a></li>
-        </ul>
+            <button class="theme-toggle" type="button" aria-label="Farbschema wechseln">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path></svg>
+            </button>
+
+            <button class="nav-toggle" aria-label="Navigation öffnen" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
     </nav>
 </header>
 
 <main>
     <section class="hero">
         <div class="container hero-inner reveal">
-            <img class="hero-logo" src="assets/logo_xeonis_v4_light.svg" alt="Xeonis Logo">
+            <img class="hero-logo" id="heroLogo" src="assets/logo_xeonis_v4_light.svg" data-logo-dark="assets/logo_xeonis_v4_light.svg" data-logo-light="assets/logo_xeonis_v2.svg" alt="Xeonis Logo">
             <p class="eyebrow">HTL 3 Rennweg Diplomarbeit 2026/27</p>
             <h1>Virtualisierung trifft Automatisierung.</h1>
             <p class="hero-tagline">Und ein bisschen Chaos.</p>
@@ -69,7 +77,7 @@
                 </p>
                 <p class="goals__intro">
                     Am Ende wollen wir eine Umgebung erschaffen, welche Hardware, Virtualisierung, Automatisierung (und Deployment), Security und LLMs miteinander vereint. Dabei wollen wir auch auf Open-source / kostenfreie Tools zurückgreifen, um zu zeigen, was alles im schulischen Rahmen möglich ist.
-                    Zu zeigen, dass es mit teils stark veralterter, aber hochwertiger Hardware möglich ist, up-to-date Software zu verwenden ist auch ein Ziel was wir uns gesteckt haben. Natürlich darf am Ende auch eine entsprechende Dokumentation nicht fehlen.
+                    Zu zeigen, dass es mit teils stark veralterter, aber hochwertiger Hardware möglich ist, up-to-date Software zu verwenden ist auch ein Ziel was wir uns gesetzt haben. Natürlich darf am Ende auch eine entsprechende Dokumentation nicht fehlen.
                 </p>
             </div>
 
