@@ -43,7 +43,6 @@
             <img class="hero-logo" id="heroLogo" src="assets/logo_xeonis_v4_light.svg" data-logo-dark="assets/logo_xeonis_v4_light.svg" data-logo-light="assets/logo_xeonis_v2.svg" alt="Xeonis Logo">
             <p class="eyebrow">HTL 3 Rennweg Diplomarbeit 2026/27</p>
             <h1>Virtualisierung trifft Automatisierung.</h1>
-            <p class="hero-tagline">Und ein bisschen Chaos.</p>
             <p class="hero-text">
                 Nachdem wir nun schon 4 Jahre Unterricht an der HTL Rennweg genießen durften, wollen wir nun zeigen,
                 was wir alles in diesen Jahren gelernt haben. Dabei wollen wir viele Bereiche der IT bzw. der
@@ -70,16 +69,18 @@
                 <p class="eyebrow">Projektziele</p>
                 <h2>Was Xeonis leisten soll</h2>
                 <p class="goals__intro">
-                    Mit Chaos und viel Hardware allein ist natürlich noch kein Projekt geschaffen.
+                    Mit viel Hardware allein ist natürlich noch kein Projekt geschaffen.
                 </p>
                 <p class="goals__intro">
-                    Unsere Diplomarbeit lässt sich grob in 6 Bereiche aufteilen, die gemeinsam ein System bilden: von der physischen Hardware im Rack bis zum automatisierten Aufbau von Netzwerktopologien und die Weiterverwendung dieser. Jede dieser „Bereiche“ ist ein eigener Teil unserer Diplomarbeit.
+                    Unsere Diplomarbeit lässt sich grob in 8 Bereiche aufteilen, die gemeinsam ein System bilden: von der physischen Hardware im Rack bis zum automatisierten Aufbau von Netzwerktopologien und die Weiterverwendung dieser. Jeder dieser „Bereiche“ ist ein eigener Teil unserer Diplomarbeit.
                 </p>
                 <p class="goals__intro">
-                    Am Ende wollen wir eine Umgebung erschaffen, welche Hardware, Virtualisierung, Automatisierung (und Deployment), Security und LLMs miteinander vereint. Dabei wollen wir auch auf Open-source / kostenfreie Tools zurückgreifen, um zu zeigen, was alles im schulischen Rahmen möglich ist.
-                    Zu zeigen, dass es mit teils stark veralterter, aber hochwertiger Hardware möglich ist, up-to-date Software zu verwenden ist auch ein Ziel was wir uns gesetzt haben. Natürlich darf am Ende auch eine entsprechende Dokumentation nicht fehlen.
+                    Am Ende wollen wir eine Umgebung erschaffen, welche Hardware, Virtualisierung, Automatisierung (und Deployment), Security und LLMs miteinander vereint. Dabei wollen wir auch auf Open-Source / kostenfreie Tools zurückgreifen, um zu zeigen, was alles im schulischen Rahmen möglich ist.
+                    Zu zeigen, dass es mit teils stark veralteter, aber hochwertiger Hardware möglich ist, up-to-date Software zu verwenden ist auch ein Ziel, das wir uns gesetzt haben. Natürlich darf am Ende auch eine entsprechende Dokumentation nicht fehlen.
                 </p>
             </div>
+
+            <br>
 
             <ol class="bento-grid">
 
@@ -87,8 +88,8 @@
                     <span class="bento-number">01</span>
                     <h3 class="bento-title">Hardware &amp; OS</h3>
                     <p class="bento-text">
-                        Rack, Stromversorgung und Verkabelung müssen sauber dokumentiert
-                        und über die gesamte Projektlaufzeit funktionsfähig sein.
+                        Die Hardware im Rack ist strukturiert verkabelt, dokumentiert und regelmäßig geprüft. 
+                        Alle Ressourcen sind per IPsec-VPN remote erreichbar und folgen einem einheitlichen IP-Konzept.
                     </p>
                 </li>
 
@@ -96,13 +97,22 @@
                     <span class="bento-number">02</span>
                     <h3 class="bento-title">UCS-System</h3>
                     <p class="bento-text">
-                        8 Blade-Server werden über den UCS-Manager administriert und mit
-                        passenden Service-Profiles konfiguriert - ESXi „Produktivumgebungen“ werden auf den Bladen-Servern bereitgestellt.
+                        8 Blade-Server werden über den UCS-Manager mit Service-Profiles konfiguriert und als ESXi-Testumgebungen bereitgestellt. 
+                        Zusätzlicher Speicher kommt über Fibre Channel vom EMC-VNX-Storage.
                     </p>
                 </li>
 
                 <li class="bento-card reveal">
                     <span class="bento-number">03</span>
+                    <h3 class="bento-title">Dokumentation</h3>
+                    <p class="bento-text">
+                        Rackplan, IP-Konzept, Tool-Erfahrungsbericht und Diplomarbeitsbuch 
+                        halten den Projektstand nachvollziehbar fest. Der gesamte Code ist in Git-Repositories versioniert.
+                    </p>
+                </li>
+
+                <li class="bento-card reveal">
+                    <span class="bento-number">04</span>
                     <h3 class="bento-title">Virtualisierte Infrastruktur</h3>
                     <p class="bento-text">
                         Management-, Storage/NAS- und Monitoring-VMs bilden
@@ -111,7 +121,7 @@
                 </li>
 
                 <li class="bento-card reveal">
-                    <span class="bento-number">04</span>
+                    <span class="bento-number">05</span>
                     <h3 class="bento-title">TopologyBuilder</h3>
                     <p class="bento-text">
                         Unser Kernstück: er erstellt automatisiert virtuelle
@@ -120,16 +130,26 @@
                 </li>
 
                 <li class="bento-card reveal">
-                    <span class="bento-number">05</span>
-                    <h3 class="bento-title">Security-Pipeline &amp; Monitoring</h3>
+                    <span class="bento-number">06</span>
+                    <h3 class="bento-title">APIs &amp; Backend-Services</h3>
                     <p class="bento-text">
-                        Tools wie Batfish, Lynis oder LibreNMS prüfen Konfigurationen
-                        automatisiert und fassen die Ergebnisse in einem generierten PDF-Report zusammen.
+                        Eigene REST-APIs stellen die verfügbaren ESXi- und GNS3-Templates zentral 
+                        bereit und binden das LLM an. Der TopologyBuilder greift darauf zur Laufzeit zu.
+                    </p>
+                </li>
+
+
+                <li class="bento-card reveal">
+                    <span class="bento-number">07</span>
+                    <h3 class="bento-title">Security-Pipeline &amp; Report</h3>
+                    <p class="bento-text">
+                        Evaluierte Security-Tools wie Batfish oder Lynis prüfen Netzwerkgeräte, 
+                        Linux-Systeme und Firewalls der Topologien automatisiert und fassen die Befunde in einem Report zusammen.
                     </p>
                 </li>
 
                 <li class="bento-card reveal">
-                    <span class="bento-number">06</span>
+                    <span class="bento-number">08</span>
                     <h3 class="bento-title">LLM-Server</h3>
                     <p class="bento-text">
                         Ein lokal gehosteter LLM-Service wandelt geschriebene Beschreibungen einer Topologie in ein passendes
@@ -139,8 +159,11 @@
 
             </ol>
 
+            <br>
+
             <p class="goals__footnote reveal">
-                Unser Ergebnis soll zeigen, was möglich ist mit den umfassenden Skills, welche Schüler*innen in der Netzwerktechnik erlernen, sowie der Hardware, welche in der Schule zur Verfügung steht. Wir wollen, neben dem Ziel, ein hilfreiches Tool zu schaffen, auch in der schulischen Umgebung zeigen, wie viele Dinge in der Netzwerktechnik und verwandten Bereichen zusammenhängen.
+                Unser Ergebnis soll zeigen, was mit den Skills, die Schüler*innen in der Netzwerktechnik erlernen, und der Hardware, die in der Schule zur Verfügung steht, alles möglich ist. 
+                Wir wollen, neben dem Ziel, ein hilfreiches Tool zu schaffen, auch in der schulischen Umgebung zeigen, wie viele Dinge in der Netzwerktechnik und verwandten Bereichen zusammenhängen.
             </p>
 
         </div>
@@ -158,7 +181,7 @@
                     <img class="hardware-img" src="assets/Serverrack.jpeg" alt="Serverrack">
                     <figcaption>
                         <h3>Serverrack</h3>
-                        <p>Unser Hardwareassembly</p>
+                        <p>Unser eigenes Hardwareassembly im Serverraum.</p>
                     </figcaption>
                 </figure>
 
@@ -166,7 +189,7 @@
                     <img class="hardware-img" src="assets/UCS.png" alt="UCS">
                     <figcaption>
                         <h3>UCS 5108</h3>
-                        <p>Der Kern unseres Projekts</p>
+                        <p>Blade-Chassis mit 8 Servern &ndash; ein Grundbaustein unseres UCS-Systems.</p>
                     </figcaption>
                 </figure>
 
@@ -178,7 +201,7 @@
                     </figcaption>
                 </figure>
             </div>
-            <p class="hardware-note">Und viele Weitere...</p>
+            <p class="hardware-note">Ergänzt durch Storage-Systeme, Netzwerkkomponenten und weitere Hardware.</p>
         </div>
     </section>
 
@@ -188,7 +211,7 @@
     <div class="container footer-grid">
         <div>
             <strong>Xeonis</strong>
-            <p> Virtualisierung trifft Automatisierung</p>
+            <p> Virtualisierung trifft Automatisierung.</p>
         </div>
         <div class="footer-links">
             <a href="index.html">Home</a>

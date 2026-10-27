@@ -110,7 +110,7 @@ a {
     align-items: center;
     gap: 0.6rem;
     font-weight: 600;
-    font-size: 0.98rem;
+    font-size: 2rem;
     letter-spacing: -0.01em;
 }
 
@@ -133,7 +133,7 @@ a {
     border-radius: 999px;
     color: var(--text-secondary);
     font-weight: 400;
-    font-size: 0.92rem;
+    font-size: 1rem;
     transition: color 0.25s ease, background-color 0.25s ease;
 }
 
@@ -203,6 +203,7 @@ a {
 .hero {
     padding: calc(var(--space-xl) + 1rem) 0 var(--space-lg);
     text-align: center;
+    background: radial-gradient(ellipse 60% 40% at 50% 25%, rgba(41, 151, 255, 0.15), transparent 70%);
 }
 
 .hero-inner {
@@ -214,7 +215,7 @@ a {
 
 .hero-logo {
     width: 100%;
-    max-width: 190px;
+    max-width: 245px;
     height: auto;
     object-fit: contain;
     margin: 0 auto 2rem;
@@ -225,7 +226,7 @@ a {
     font-weight: 590;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    font-size: 0.78rem;
+    font-size: 0.90rem;
     margin-bottom: 0.9rem;
 }
 
@@ -330,7 +331,7 @@ p {
     border-radius: 999px;
     border: 1px solid var(--border-soft);
     background: var(--surface);
-    font-size: 0.88rem;
+    font-size: 0.90rem;
     color: var(--text-secondary);
 }
 
@@ -379,8 +380,10 @@ p {
 .bento-grid {
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 1.1rem;
+    width: 90%;
+    margin-inline: auto;
 }
 
 .bento-card {
@@ -391,11 +394,25 @@ p {
     transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.4s ease, border-color 0.4s ease;
 }
 
+.bento-card {
+    grid-column: span 2;
+}
+
+.bento-card:nth-last-child(2) {
+    grid-column: 2 / span 2;
+}
+
+.bento-grid
 .bento-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.02);
     background: var(--surface-strong);
     border-color: var(--border);
 }
+
+.bento-grid .bento-card:nth-child(5) {
+    border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+    box-shadow: 0 0 30px color-mix(in srgb, var(--accent) 40%, transparent);
+}   
 
 .bento-number {
     display: block;
@@ -443,8 +460,9 @@ p {
     transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.4s ease;
 }
 
+.hardware-grid
 .hardware-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.03);
     background: var(--surface-strong);
 }
 
@@ -706,6 +724,11 @@ p {
 @media (max-width: 920px) {
     .bento-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .bento-card,
+    .bento-card:nth-last-child(2) {
+        grid-column: auto;
     }
 
     .nav-toggle {
