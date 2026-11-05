@@ -817,7 +817,7 @@ p {
 
 .sponsor-logo img {
     width: 100%;
-    max-width: 20%;
+    max-width: 19rem;
     height: auto;
     border-radius: 12px;
 }
