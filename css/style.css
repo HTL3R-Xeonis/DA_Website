@@ -816,7 +816,7 @@ p {
 }
 
 .sponsor-logo img {
-    width: clamp(10rem, 40vw, 19rem);
+    width: clamp(11rem, 48vw, 19rem);
     height: auto;
     border-radius: 0.75rem;
     background: #fff;
