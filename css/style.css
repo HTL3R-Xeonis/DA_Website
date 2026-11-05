@@ -816,13 +816,10 @@ p {
 }
 
 .sponsor-logo img {
-    width: 100%;
-    max-width: 19rem;
+    width: clamp(10rem, 40vw, 19rem);
     height: auto;
-    border-radius: 12px;
-}
-
-.sponsor-logo img {
+    border-radius: 0.75rem;
     background: #fff;
-    padding: 24px 24px;
+    padding: clamp(0.75rem, 2vw, 1.5rem);
+    
 }
