@@ -823,3 +823,11 @@ p {
     padding: clamp(0.75rem, 2vw, 1.5rem);
     
 }
+
+.sponsor-logos {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+}
