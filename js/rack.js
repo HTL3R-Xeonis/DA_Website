@@ -111,7 +111,7 @@
         const name = el('span', 'rack-item-name');
         name.textContent = device.name;
         const meta = el('span', 'rack-item-meta');
-        meta.textContent = device.role + ' · ca. ' + Math.round(device.depth / 10) + ' cm tief';
+        meta.textContent = device.role;
         text.append(name, meta);
 
         const badge = el('span', 'rack-item-he');
@@ -137,61 +137,15 @@
         }
     }
 
-    /* ---------- Drehen: Ziehen, Pfeiltasten, Voreinstellungen ---------- */
+    /* ---------- Drehen: Ziehen, Pfeiltasten ---------- */
     let ry = -14;
     let rx = 4;
     let userTouched = false;
-    let tween = null;
 
     function render(extraRy) {
         rack.style.setProperty('--ry', (ry + (extraRy || 0)).toFixed(2) + 'deg');
         rack.style.setProperty('--rx', rx.toFixed(2) + 'deg');
     }
-
-    function animateTo(targetRy, targetRx) {
-        userTouched = true;
-        if (reduceMotion) {
-            ry = targetRy;
-            rx = targetRx;
-            render();
-            return;
-        }
-        let delta = (targetRy - ry) % 360;
-        if (delta > 180) delta -= 360;
-        if (delta <= -180) delta += 360;
-        const fromRy = ry;
-        const fromRx = rx;
-        const start = performance.now();
-        const duration = 800;
-        tween = start;
-        function step(now) {
-            if (tween !== start) return; /* durch Ziehen oder neue Voreinstellung abgelöst */
-            const t = Math.min(1, (now - start) / duration);
-            const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-            ry = fromRy + delta * e;
-            rx = fromRx + (targetRx - fromRx) * e;
-            render();
-            if (t < 1) requestAnimationFrame(step);
-        }
-        requestAnimationFrame(step);
-    }
-
-    const presets = {
-        front: [-14, 4],
-        side: [-64, 10],
-        back: [166, 4]
-    };
-    const controls = document.querySelectorAll('.rack-controls button');
-    function setPressed(name) {
-        controls.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === name)));
-    }
-    controls.forEach((button) => {
-        button.addEventListener('click', () => {
-            const p = presets[button.dataset.view];
-            animateTo(p[0], p[1]);
-            setPressed(button.dataset.view);
-        });
-    });
 
     let dragging = false;
     let lastX = 0;
@@ -213,7 +167,6 @@
         if (!dragMoved) {
             dragMoved = true;
             userTouched = true;
-            tween = null;
             stage.classList.add('is-dragging');
             try {
                 stage.setPointerCapture(event.pointerId);
@@ -225,7 +178,6 @@
         rx = Math.max(0, Math.min(22, rx - (event.clientY - lastY) * 0.2));
         lastX = event.clientX;
         lastY = event.clientY;
-        setPressed('');
         render();
     });
 
@@ -248,8 +200,6 @@
         else return;
         event.preventDefault();
         userTouched = true;
-        tween = null;
-        setPressed('');
         render();
     });
 
@@ -263,6 +213,5 @@
         })(t0);
     }
 
-    setPressed('front');
     render();
 })();
