@@ -1,0 +1,279 @@
+/* Rackplan: drehbares 3D-Rack (reines CSS 3D, keine Bibliothek) */
+
+.rack-layout {
+    --rack-h: min(80vh, 900px);
+    --rack-w: calc(var(--rack-h) * 0.3124); /* Seitenverhältnis der Rack-Bilder (930 x 2977) */
+    --rack-d: calc(var(--rack-w) * 1.5);
+    display: grid;
+    grid-template-columns: minmax(300px, 460px) 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+.rack-viewer {
+    position: sticky;
+    top: calc(var(--header-height) + 1rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.rack-stage {
+    position: relative;
+    width: 100%;
+    height: calc(var(--rack-h) + 2.5rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1800px;
+    perspective-origin: 50% 40%;
+    border-radius: var(--radius-lg);
+    background:
+        radial-gradient(ellipse at 50% 92%, var(--surface-strong), transparent 62%),
+        var(--surface);
+    border: 1px solid var(--border-soft);
+    overflow: hidden;
+    cursor: grab;
+    touch-action: pan-y; /* senkrecht scrollt die Seite, waagrechtes Ziehen dreht das Rack */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.rack-stage.is-dragging {
+    cursor: grabbing;
+}
+
+.rack-stage:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.rack-floor {
+    position: absolute;
+    left: 50%;
+    bottom: 1.1rem;
+    width: calc(var(--rack-d) * 1.1);
+    height: calc(var(--rack-d) * 0.28);
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.5), transparent 70%);
+    pointer-events: none;
+}
+
+.rack-3d {
+    position: relative;
+    width: var(--rack-w);
+    height: var(--rack-h);
+    transform-style: preserve-3d;
+    transform: rotateX(var(--rx, 4deg)) rotateY(var(--ry, -14deg));
+    will-change: transform;
+}
+
+.rack-face {
+    position: absolute;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.rack-face--front,
+.rack-face--back {
+    inset: 0;
+}
+
+.rack-face--front {
+    transform: translateZ(calc(var(--rack-d) / 2));
+}
+
+.rack-face--back {
+    transform: rotateY(180deg) translateZ(calc(var(--rack-d) / 2));
+}
+
+.rack-face img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    pointer-events: none;
+    -webkit-user-drag: none;
+}
+
+/* Seiten und Deckel des Racks: einfache Stahlflächen, damit der Körper sichtbar ist */
+.rack-face--left,
+.rack-face--right {
+    top: 0;
+    width: var(--rack-d);
+    height: 100%;
+    left: calc((var(--rack-w) - var(--rack-d)) / 2);
+    background:
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 2px, transparent 2px 22px),
+        linear-gradient(90deg, #131316, #26262b 45%, #17171a);
+    box-shadow: inset 0 0 0 2px #0a0a0c;
+}
+
+.rack-face--left {
+    transform: rotateY(-90deg) translateZ(calc(var(--rack-w) / 2));
+}
+
+.rack-face--right {
+    transform: rotateY(90deg) translateZ(calc(var(--rack-w) / 2));
+}
+
+.rack-face--top {
+    left: 0;
+    width: 100%;
+    height: var(--rack-d);
+    top: calc((var(--rack-h) - var(--rack-d)) / 2);
+    transform: rotateX(90deg) translateZ(calc(var(--rack-h) / 2));
+    background:
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 18px),
+        linear-gradient(180deg, #2b2b30, #1a1a1d);
+    box-shadow: inset 0 0 0 2px #0a0a0c;
+}
+
+/* klickbare Geräteflächen auf Vorder- und Rückseite */
+.rack-hit {
+    position: absolute;
+    left: 10.3%;
+    width: 76.9%;
+    padding: 0;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.rack-hit.is-active {
+    background: color-mix(in srgb, var(--accent) 26%, transparent);
+    box-shadow: 0 0 0 2px var(--accent), 0 0 18px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.rack-controls {
+    display: inline-flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+}
+
+.rack-controls button {
+    font: inherit;
+    font-size: 0.9rem;
+    padding: 0.4rem 1.1rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.rack-controls button[aria-pressed="true"] {
+    background: var(--accent);
+    color: #fff;
+}
+
+.rack-controls button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.rack-hint {
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+    text-align: center;
+}
+
+/* Geräteliste */
+.rack-list {
+    list-style: none;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.rack-item {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.rack-item.is-active {
+    border-color: var(--accent);
+    background: var(--surface-strong);
+}
+
+.rack-item > button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.rack-item > button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+.rack-item-name {
+    font-weight: 600;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+}
+
+.rack-item-he {
+    flex: none;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.15rem 0.7rem;
+}
+
+.rack-item-body {
+    display: none;
+    padding: 0 1.25rem 1.1rem;
+    color: var(--text-secondary);
+}
+
+.rack-item.is-active .rack-item-body {
+    display: block;
+}
+
+.rack-item-body p + p {
+    margin-top: 0.5rem;
+}
+
+.rack-item-pos {
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+}
+
+@media (max-width: 920px) {
+    .rack-layout {
+        --rack-h: min(62vh, 560px);
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .rack-viewer {
+        position: static;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rack-hit,
+    .rack-item {
+        transition: none;
+    }
+}
