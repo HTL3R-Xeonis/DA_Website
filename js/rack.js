@@ -7,7 +7,16 @@
     const list = document.getElementById('rackList');
     if (!stage || !rack || !list) return;
 
+    const layout = rack.closest('.rack-layout');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+
+    /* Rack-Maße in mm: Standard-Rack 600 x 1000, vordere und hintere Montageschienen je 45 mm von der Kante */
+    const RACK_DEPTH = 1000;
+    const MOUNT_FRONT = 45;
+    const MOUNT_BACK = 45;
+    layout.style.setProperty('--rack-depth-mm', String(RACK_DEPTH));
+    const Z_FRONT = RACK_DEPTH / 2 - MOUNT_FRONT; /* Ebene der Gerätefronten */
 
     /* Geometrie des Rack-Bildes (930 x 2977 px): Mitte von HE 42 und HE 1, daraus die Höhe einer HE */
     const IMG_H = 2977;
@@ -16,17 +25,34 @@
     const PER_U = (U1_CENTER - U42_CENTER) / 41;
 
     /* Geräte laut Rackplan. ranges = [oberste HE, unterste HE] (HE wie auf den Schienen, 42 oben).
-       depth = Gerätetiefe in mm, GESCHÄTZT nach Herstellerangaben und gerundet - bitte am echten Gerät nachmessen. */
+       depth = Gerätetiefe in mm, GESCHÄTZT nach Herstellerangaben und gerundet - bitte am echten Gerät nachmessen.
+       cables = schematische Kabel auf der Rückseite: ['net'|'fc'|'sas', Zielgerät, Index des Ziels] oder ['pwr', 'r'|'l']
+       (rechte beziehungsweise linke Steckdosenleiste). Sie zeigen nur die Art der Verkabelung, nicht die echte Belegung. */
     const DEVICES = [
-        { id: 'catalyst', name: 'Cisco Catalyst 4948', role: 'Switch', depth: 410, ranges: [[40, 40]] },
-        { id: 'dl160', name: 'HPE ProLiant DL160 Gen9', role: 'Server', depth: 620, ranges: [[39, 39]] },
+        {
+            id: 'catalyst',
+            name: 'Cisco Catalyst 4948',
+            role: 'Switch',
+            depth: 410,
+            ranges: [[40, 40]],
+            cables: [['net', 'top'], ['net', 'top'], ['net', 'top'], ['pwr', 'r'], ['pwr', 'l']]
+        },
+        {
+            id: 'dl160',
+            name: 'HPE ProLiant DL160 Gen9',
+            role: 'Server',
+            depth: 620,
+            ranges: [[39, 39]],
+            cables: [['net', 'catalyst'], ['net', 'catalyst'], ['pwr', 'r'], ['pwr', 'l']]
+        },
         {
             id: 'vnx-dae',
             name: 'EMC VNX DAE',
             role: 'Speicher-Erweiterung',
             count: '4 Stück',
             depth: 360,
-            ranges: [[37, 35], [34, 32], [31, 29], [11, 9]]
+            ranges: [[37, 35], [34, 32], [31, 29], [11, 9]],
+            cables: [['sas', 'vnx-dpe', [0, 0, 0, 1]], ['pwr', 'r'], ['pwr', 'l']]
         },
         {
             id: 'vnx-dpe',
@@ -34,21 +60,51 @@
             role: 'Speicher-Controller',
             count: '2 Stück',
             depth: 610,
-            ranges: [[28, 26], [14, 12]]
+            ranges: [[28, 26], [14, 12]],
+            cables: [['fc', 'ucs-fi', [0, 1]], ['fc', 'ucs-fi', [1, 0]], ['net', 'catalyst'], ['pwr', 'r'], ['pwr', 'l']]
         },
-        { id: 'blende', name: 'Rack-Blende', role: 'Blende', depth: 20, ranges: [[24, 24]] },
-        { id: 'dl385', name: 'HP ProLiant DL385 G7', role: 'Server', depth: 700, ranges: [[23, 22]] },
-        { id: 'r730', name: 'Dell PowerEdge R730', role: 'Server', depth: 700, ranges: [[21, 20]] },
-        { id: 'powervault', name: 'Dell PowerVault', role: 'Disk-Gehäuse, 5 Schubladen', depth: 820, ranges: [[19, 15]] },
+        { id: 'blende', name: 'Rack-Blende', role: 'Blende', depth: 20, ranges: [[24, 24]], cables: [] },
+        {
+            id: 'dl385',
+            name: 'HP ProLiant DL385 G7',
+            role: 'Server',
+            depth: 700,
+            ranges: [[23, 22]],
+            cables: [['net', 'catalyst'], ['net', 'catalyst'], ['fc', 'ucs-fi', 0], ['fc', 'ucs-fi', 1], ['pwr', 'r'], ['pwr', 'l']]
+        },
+        {
+            id: 'r730',
+            name: 'Dell PowerEdge R730',
+            role: 'Server',
+            depth: 700,
+            ranges: [[21, 20]],
+            cables: [['net', 'catalyst'], ['net', 'catalyst'], ['net', 'catalyst'], ['fc', 'ucs-fi', 0], ['fc', 'ucs-fi', 1], ['pwr', 'r'], ['pwr', 'l']]
+        },
+        {
+            id: 'powervault',
+            name: 'Dell PowerVault',
+            role: 'Disk-Gehäuse, 5 Schubladen',
+            depth: 820,
+            ranges: [[19, 15]],
+            cables: [['sas', 'dl385'], ['sas', 'r730'], ['pwr', 'r'], ['pwr', 'l']]
+        },
         {
             id: 'ucs-fi',
             name: 'Cisco UCS 6248UP',
             role: 'Fabric Interconnect',
             count: '2 Stück',
             depth: 760,
-            ranges: [[8, 8], [7, 7]]
+            ranges: [[8, 8], [7, 7]],
+            cables: [['net', 'catalyst'], ['net', 'catalyst'], ['fc', 'ucs-chassis'], ['fc', 'ucs-chassis'], ['pwr', 'r'], ['pwr', 'l']]
         },
-        { id: 'ucs-chassis', name: 'Cisco UCS 5108', role: 'Blade-Chassis, 8 Server', depth: 810, ranges: [[6, 1]] }
+        {
+            id: 'ucs-chassis',
+            name: 'Cisco UCS 5108',
+            role: 'Blade-Chassis, 8 Server',
+            depth: 810,
+            ranges: [[6, 1]],
+            cables: [['pwr', 'r'], ['pwr', 'r'], ['pwr', 'l'], ['pwr', 'l']]
+        }
     ];
 
     function heLabel(range) {
@@ -65,44 +121,17 @@
         return node;
     }
 
-    /* ---------- Gehäuse: Seitenwände, Deckel, Schienen ---------- */
-    ['left', 'right', 'top'].forEach((side) => rack.appendChild(el('div', 'rack-wall-' + side)));
-    ['fl', 'fr', 'bl', 'br'].forEach((pos) => rack.appendChild(el('div', 'rack-rail rack-rail--' + pos)));
+    function mm(value) {
+        return 'calc(' + value + ' * var(--mm))';
+    }
 
-    /* ---------- Geräte als Körper und Liste ---------- */
+    /* ---------- Liste und Auswahl (sofort, damit die Seite nicht springt) ---------- */
     const boxesById = {};
     const itemsById = {};
     let activeId = null;
     let dragMoved = false;
 
     DEVICES.forEach((device) => {
-        boxesById[device.id] = [];
-
-        device.ranges.forEach((range) => {
-            const box = el('div', 'dev');
-            const top = (U42_CENTER + (42 - range[0]) * PER_U - PER_U / 2) / IMG_H;
-            const height = ((range[0] - range[1] + 1) * PER_U) / IMG_H;
-            box.style.setProperty('--t', top.toFixed(5));
-            box.style.setProperty('--h', height.toFixed(5));
-            box.style.setProperty('--dm', String(device.depth));
-
-            ['front', 'back'].forEach((side) => {
-                const face = el('button', 'dev-' + side);
-                face.type = 'button';
-                face.tabIndex = -1;
-                face.setAttribute('aria-label', device.name + ' auswählen');
-                face.addEventListener('click', () => {
-                    if (dragMoved) return;
-                    select(device.id, false);
-                });
-                box.appendChild(face);
-            });
-            ['left', 'right', 'top'].forEach((side) => box.appendChild(el('div', 'dev-' + side)));
-
-            rack.appendChild(box);
-            boxesById[device.id].push(box);
-        });
-
         const li = el('li', 'rack-item');
         const button = el('button');
         button.type = 'button';
@@ -125,26 +154,291 @@
         button.addEventListener('click', () => select(device.id, true));
     });
 
-    function select(id, fromList) {
-        activeId = activeId === id && !fromList ? null : id;
+    /* Die 3D-Szene wird erst gebaut, wenn der Abschnitt in die Nähe des Bildschirms kommt (spart Ladezeit) */
+    let built = false;
+    function buildScene() {
+        if (built) return;
+        built = true;
+        /* ---------- Szene: Boden, Schatten, Wände, Rahmen, Schienen, Füße ---------- */
+        rack.appendChild(el('div', 'rack-floor3d'));
+        rack.appendChild(el('div', 'rack-shadow'));
+        ['left', 'right', 'top'].forEach((side) => rack.appendChild(el('div', 'rack-wall-' + side)));
+        ['front', 'back'].forEach((side) => rack.appendChild(el('div', 'rack-ring rack-ring--' + side)));
+        ['fl', 'fr', 'bl', 'br'].forEach((pos) => rack.appendChild(el('div', 'rack-rail rack-rail--' + pos)));
+
+        /* Körper aus fünf Flächen (Füße, Steckdosenleisten): Position in Prozent des Racks, Maße als CSS-Ausdruck */
+        function solid(className, opts) {
+            const box = el('div', 'solid ' + className);
+            box.style.left = opts.left;
+            box.style.top = opts.top;
+            box.style.setProperty('--bw', opts.bw);
+            box.style.setProperty('--bh', opts.bh);
+            box.style.setProperty('--bd', opts.bd);
+            box.style.transform = 'translateZ(' + mm(opts.z) + ')';
+            ['front', 'back', 'left', 'right', 'top'].forEach((side) => {
+                const face = el('i', 's-' + side);
+                if (opts.sockets === side) face.classList.add('pdu-sockets');
+                box.appendChild(face);
+            });
+            rack.appendChild(box);
+            return box;
+        }
+
+        [
+            ['3%', Z_FRONT + 10],
+            ['89%', Z_FRONT + 10],
+            ['3%', -RACK_DEPTH / 2 + MOUNT_BACK + 20],
+            ['89%', -RACK_DEPTH / 2 + MOUNT_BACK + 20]
+        ].forEach(([left, z]) => {
+            solid('solid--foot', {
+                left: left,
+                top: 'calc(100% - var(--foot-h))',
+                bw: 'calc(var(--rack-w) * 0.08)',
+                bh: 'var(--foot-h)',
+                bd: mm(80),
+                z: z - 30
+            });
+        });
+
+        /* Steckdosenleisten hinten links und rechts (senkrecht), Steckplätze zur Rackmitte */
+        const PDU_Z = -RACK_DEPTH / 2 + 60;
+        solid('solid--pdu', { left: '0.8%', top: '36%', bw: 'calc(var(--rack-w) * 0.04)', bh: 'calc(var(--rack-h) * 0.56)', bd: mm(45), z: PDU_Z, sockets: 'right' });
+        solid('solid--pdu', { left: '95.2%', top: '36%', bw: 'calc(var(--rack-w) * 0.04)', bh: 'calc(var(--rack-h) * 0.56)', bd: mm(45), z: PDU_Z, sockets: 'left' });
+
+        /* ---------- Kabel: Ebenen mit geschwungenen Verläufen, dazu Streifen entlang der Tiefe ---------- */
+        const PX = 9.3; /* 930 Einheiten = 100 % der Rackbreite */
+        const PY = 29.77; /* 2977 Einheiten = 100 % der Rackhöhe */
+        const LAYER_Z = { pwr: -482, net: -472, sas: -467, fc: -462 }; /* hinter den hinteren Schienen, übereinander gestaffelt */
+        const CABLE = {
+            net: { color: '#2f6fd6', width: 9 },
+            fc: { color: '#2fbfbf', width: 8 },
+            sas: { color: '#8a8a94', width: 10 },
+            pwr: { color: '#2a2a31', width: 13 }
+        };
+        const layers = {};
+        Object.keys(LAYER_Z).forEach((type) => {
+            const svg = document.createElementNS(SVG_NS, 'svg');
+            svg.setAttribute('class', 'cab-plane');
+            svg.setAttribute('viewBox', '0 0 930 2977');
+            svg.setAttribute('preserveAspectRatio', 'none');
+            svg.style.transform = 'translateZ(' + mm(LAYER_Z[type]) + ')';
+            rack.appendChild(svg);
+            layers[type] = svg;
+        });
+
+        function svgPath(type, d, stroke, width, opacity) {
+            const path = document.createElementNS(SVG_NS, 'path');
+            path.setAttribute('d', d);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', stroke);
+            path.setAttribute('stroke-width', String(width));
+            path.setAttribute('stroke-linecap', 'round');
+            path.setAttribute('stroke-linejoin', 'round');
+            if (opacity !== undefined) path.setAttribute('stroke-opacity', String(opacity));
+            layers[type].appendChild(path);
+        }
+
+        function drawCable(type, d) {
+            const spec = CABLE[type];
+            svgPath(type, d, '#000', spec.width + 4, 0.5);
+            if (type === 'pwr') svgPath(type, d, '#fff', spec.width + 2, 0.16);
+            svgPath(type, d, spec.color, spec.width);
+            svgPath(type, d, '#fff', Math.max(2, spec.width * 0.28), type === 'pwr' ? 0.16 : 0.28);
+        }
+
+        /* Streifen vom Geräterücken zur Kabelebene (damit die Kabel am richtigen Gerät hängen, auch beim Drehen) */
+        function feeder(type, xPct, yPct, z1, z2) {
+            const len = Math.abs(z1 - z2);
+            if (len < 4) return;
+            const strip = el('div', 'cab cab--' + type);
+            strip.style.width = 'calc(var(--rack-w) * 0.012)';
+            strip.style.height = mm(len);
+            strip.style.left = 'calc(' + xPct + '% - var(--rack-w) * 0.006)';
+            strip.style.top = 'calc(' + yPct + '% - ' + mm(len) + ' / 2)';
+            strip.style.transform = 'translateZ(' + mm((z1 + z2) / 2) + ') rotateZ(45deg) rotateX(90deg)';
+            rack.appendChild(strip);
+        }
+
+        /* Datenkabel von einem Gerät zu einem anderen: seitlich in eine Bahn, senkrecht entlang der Schienen, wieder hinein */
+        function dataCable(type, from, to, lane) {
+            const xs = from.x * PX;
+            const ys = from.y * PY;
+            const xd = to.x * PX;
+            const yd = to.y * PY;
+            const xl = lane * PX;
+            const dir = yd < ys ? -1 : 1;
+            let d;
+            if (Math.abs(yd - ys) < 190) {
+                d = 'M' + xs + ',' + ys + ' C' + xl + ',' + ys + ' ' + xl + ',' + yd + ' ' + xd + ',' + yd;
+            } else {
+                d =
+                    'M' + xs + ',' + ys +
+                    ' C' + (xs - 50) + ',' + ys + ' ' + xl + ',' + ys + ' ' + xl + ',' + (ys + dir * 90) +
+                    ' L' + xl + ',' + (yd - dir * 90) +
+                    ' C' + xl + ',' + yd + ' ' + (xd - 50) + ',' + yd + ' ' + xd + ',' + yd;
+            }
+            feeder(type, from.x, from.y, from.z, LAYER_Z[type]);
+            if (to.z !== undefined) feeder(type, to.x, to.y, to.z, LAYER_Z[type]);
+            drawCable(type, d);
+        }
+
+        /* Stromkabel zur Steckdosenleiste auf der jeweiligen Seite, mit etwas Durchhang */
+        function powerCable(side, from) {
+            const sgn = side === 'r' ? 1 : -1;
+            const xs = from.x * PX;
+            const ys = from.y * PY;
+            const xp = (side === 'r' ? 95.4 : 4.8) * PX;
+            const d = 'M' + xs + ',' + ys + ' C' + (xs + sgn * 60) + ',' + (ys + 100) + ' ' + (xp - sgn * 70) + ',' + (ys + 130) + ' ' + xp + ',' + (ys + 55);
+            feeder('pwr', from.x, from.y, from.z, LAYER_Z.pwr);
+            drawCable('pwr', d);
+        }
+
+        /* ---------- Geräte als Körper und Liste ---------- */
+        const placed = {};
+
+        DEVICES.forEach((device) => {
+            boxesById[device.id] = [];
+            placed[device.id] = [];
+
+            device.ranges.forEach((range) => {
+                const box = el('div', 'dev');
+                const top = (U42_CENTER + (42 - range[0]) * PER_U - PER_U / 2) / IMG_H;
+                const height = ((range[0] - range[1] + 1) * PER_U) / IMG_H;
+                box.style.setProperty('--t', top.toFixed(5));
+                box.style.setProperty('--h', height.toFixed(5));
+                box.style.setProperty('--dm', String(device.depth));
+
+                ['front', 'back'].forEach((side) => {
+                    const face = el('button', 'dev-' + side);
+                    face.type = 'button';
+                    face.tabIndex = -1;
+                    face.setAttribute('aria-label', device.name + ' auswählen');
+                    face.addEventListener('click', () => {
+                        if (dragMoved) return;
+                        select(device.id, false);
+                    });
+                    box.appendChild(face);
+                });
+                ['left', 'right', 'top'].forEach((side) => box.appendChild(el('div', 'dev-' + side)));
+
+                rack.appendChild(box);
+                boxesById[device.id].push(box);
+                placed[device.id].push({ y: (top + height / 2) * 100, h: height * 100, z: Z_FRONT - device.depth });
+            });
+        });
+
+        /* Kabel verlegen, sobald alle Geräte ihre Position haben */
+        const slotOf = {};
+        const lanes = { net: 0, fc: 0, sas: 0 };
+        DEVICES.forEach((device) => {
+            device.ranges.forEach((range, ri) => {
+                const here = placed[device.id][ri];
+                const data = device.cables.filter((c) => c[0] !== 'pwr');
+                const power = device.cables.filter((c) => c[0] === 'pwr');
+                const spacing = Math.min(0.9, here.h / (Math.max(data.length, power.length) + 1));
+
+                data.forEach((cable, i) => {
+                    const type = cable[0];
+                    const dy = (i - (data.length - 1) / 2) * spacing;
+                    const from = { x: 11.8 + i * 1.7, y: here.y + dy, z: here.z };
+                    let lane;
+                    if (type === 'net') lane = 5.0 + (lanes.net++ % 9) * 0.5;
+                    else if (type === 'fc') lane = 7.2 + (lanes.fc++ % 7) * 0.35;
+                    else lane = 9.4 + (lanes.sas++ % 3) * 0.2;
+
+                    if (cable[1] === 'top') {
+                        dataCable(type, from, { x: lane, y: 1.5 }, lane);
+                        return;
+                    }
+                    const idx = Array.isArray(cable[2]) ? cable[2][ri] : cable[2] || 0;
+                    const target = placed[cable[1]][idx];
+                    const key = cable[1] + ':' + idx;
+                    const slot = (slotOf[key] = (slotOf[key] || 0) + 1);
+                    dataCable(type, from, { x: 13 + slot * 4.4, y: target.y, z: target.z }, lane);
+                });
+
+                const used = { r: 0, l: 0 };
+                power.forEach((cable, i) => {
+                    const side = cable[1];
+                    const dy = (i - (power.length - 1) / 2) * spacing;
+                    const x = side === 'r' ? 85.9 - used.r++ * 1.4 : 12.1 + used.l++ * 1.4;
+                    powerCable(side, { x: x, y: here.y + dy, z: here.z });
+                });
+            });
+        });
+
+        /* blaue Kabelbinder quer über die Netzwerkbahnen, schwarze über die Stromkabel */
+        [14, 22, 31, 41, 51, 61, 71, 80].forEach((y) => {
+            const tie = document.createElementNS(SVG_NS, 'rect');
+            tie.setAttribute('x', String(4.4 * PX));
+            tie.setAttribute('y', String(y * PY - 8));
+            tie.setAttribute('width', String(5.6 * PX));
+            tie.setAttribute('height', '16');
+            tie.setAttribute('rx', '5');
+            tie.setAttribute('fill', '#1f4cb0');
+            layers.net.appendChild(tie);
+        });
+
+        if (activeId) applyActive();
+        render();
+    }
+
+    function applyActive() {
         Object.keys(itemsById).forEach((key) => {
             const on = key === activeId;
             itemsById[key].classList.toggle('is-active', on);
-            boxesById[key].forEach((box) => box.classList.toggle('is-active', on));
+            (boxesById[key] || []).forEach((box) => box.classList.toggle('is-active', on));
         });
+    }
+
+    function select(id, fromList) {
+        activeId = activeId === id && !fromList ? null : id;
+        applyActive();
         if (activeId && !fromList) {
             itemsById[activeId].scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
         }
     }
 
+    /* ---------- Beleuchtung: Helligkeit der Flächen nach Drehwinkel ---------- */
+    const LIGHT = (function () {
+        const v = [-0.5, -0.7, 0.55];
+        const l = Math.hypot(v[0], v[1], v[2]);
+        return [v[0] / l, v[1] / l, v[2] / l];
+    })();
+    const NORMALS = { f: [0, 0, 1], b: [0, 0, -1], l: [-1, 0, 0], r: [1, 0, 0], t: [0, -1, 0] };
+
+    function applyLight() {
+        const a = (ry * Math.PI) / 180;
+        const b = (rx * Math.PI) / 180;
+        Object.keys(NORMALS).forEach((key) => {
+            const n = NORMALS[key];
+            /* wie die CSS-Drehung: erst um Y, dann um X */
+            const x = n[0] * Math.cos(a) + n[2] * Math.sin(a);
+            const z = -n[0] * Math.sin(a) + n[2] * Math.cos(a);
+            const y2 = n[1] * Math.cos(b) - z * Math.sin(b);
+            const z2 = n[1] * Math.sin(b) + z * Math.cos(b);
+            const diffuse = Math.max(0, x * LIGHT[0] + y2 * LIGHT[1] + z2 * LIGHT[2]);
+            rack.style.setProperty('--sh-' + key, (0.4 * (1 - diffuse)).toFixed(3));
+            rack.style.setProperty('--hi-' + key, (0.14 * diffuse * diffuse).toFixed(3));
+        });
+    }
+
     /* ---------- Drehen: Ziehen, Pfeiltasten ---------- */
     let ry = -14;
-    let rx = 4;
+    let rx = 10;
     let userTouched = false;
 
     function render(extraRy) {
         rack.style.setProperty('--ry', (ry + (extraRy || 0)).toFixed(2) + 'deg');
         rack.style.setProperty('--rx', rx.toFixed(2) + 'deg');
+        applyLight();
+        if (Math.cos((ry * Math.PI) / 180) < 0.4) rack.classList.add('show-back');
+    }
+
+    function markUsed() {
+        userTouched = true;
+        stage.classList.add('is-used');
+        rack.classList.add('show-back'); /* Rückseitenbild erst jetzt laden, wenn jemand dreht */
     }
 
     let dragging = false;
@@ -166,7 +460,7 @@
         if (!dragMoved && Math.hypot(event.clientX - startX, event.clientY - startY) < 5) return;
         if (!dragMoved) {
             dragMoved = true;
-            userTouched = true;
+            markUsed();
             stage.classList.add('is-dragging');
             try {
                 stage.setPointerCapture(event.pointerId);
@@ -199,7 +493,7 @@
         else if (event.key === 'ArrowDown') rx = Math.max(0, rx - 4);
         else return;
         event.preventDefault();
-        userTouched = true;
+        markUsed();
         render();
     });
 
@@ -211,6 +505,21 @@
             render(Math.sin((now - t0) / 1800) * 7);
             requestAnimationFrame(sway);
         })(t0);
+    }
+
+    if ('IntersectionObserver' in window) {
+        const watcher = new IntersectionObserver(
+            (entries) => {
+                if (entries.some((entry) => entry.isIntersecting)) {
+                    buildScene();
+                    watcher.disconnect();
+                }
+            },
+            { rootMargin: '800px 0px' }
+        );
+        watcher.observe(stage);
+    } else {
+        buildScene();
     }
 
     render();

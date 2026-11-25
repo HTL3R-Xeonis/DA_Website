@@ -1,0 +1,9 @@
+{
+  "servers": 11,
+  "ram_gb": 760,
+  "ram_gb_plus": true,
+  "storage_tb": 50,
+  "storage_tb_plus": true,
+  "updated": "2026-11-25",
+  "note": "servers = 8 UCS-Blades + HPE DL160 + HP DL385 + Dell R730 (Rackplan). ram_gb = Untergrenze in GB: 8 Blades 479,2 (4 gelesen, 4 gleich angenommen) + Dell R730 127,9 + HPE DL160 64 + HP DL385 knapp 100 (ca. 96) = ca. 767, abgerundet. storage_tb = grobe Untergrenze in TB (13,5 TiB Platten am R730 plus EMC VNX, dazu einige 2-TB-Platten). *_plus = Wert wird mit Plus angezeigt. null = Zahl nicht zeigen."
+}

@@ -1,0 +1,99 @@
+{
+  "generated_at": "2026-11-25T10:28:16Z",
+  "org": "HTL3R-Xeonis",
+  "totals": {
+    "repos": 9,
+    "commits": 532,
+    "releases": 19,
+    "code_lines": 105991,
+    "test_lines": 50405,
+    "contributors": 5
+  },
+  "languages": [
+    {
+      "name": "Python",
+      "lines": 90516
+    },
+    {
+      "name": "JavaScript",
+      "lines": 9464
+    },
+    {
+      "name": "CSS",
+      "lines": 2967
+    },
+    {
+      "name": "HTML",
+      "lines": 1690
+    },
+    {
+      "name": "Shell",
+      "lines": 1354
+    }
+  ],
+  "repos": [
+    {
+      "name": ".github",
+      "branch": "main",
+      "commits": 4,
+      "releases": 0,
+      "code_lines": 0
+    },
+    {
+      "name": "DA_Website",
+      "branch": "main",
+      "commits": 31,
+      "releases": 0,
+      "code_lines": 1662
+    },
+    {
+      "name": "DA_Website_Redirect",
+      "branch": "main",
+      "commits": 6,
+      "releases": 0,
+      "code_lines": 15
+    },
+    {
+      "name": "Ginnungagap-Appliance",
+      "branch": "main",
+      "commits": 48,
+      "releases": 8,
+      "code_lines": 31295
+    },
+    {
+      "name": "Hugyn-and-Munyn",
+      "branch": "main",
+      "commits": 31,
+      "releases": 2,
+      "code_lines": 2640
+    },
+    {
+      "name": "Igdrasyl",
+      "branch": "main",
+      "commits": 218,
+      "releases": 5,
+      "code_lines": 44675
+    },
+    {
+      "name": "Mimyr",
+      "branch": "main",
+      "commits": 36,
+      "releases": 1,
+      "code_lines": 6273
+    },
+    {
+      "name": "SecurityPipeline",
+      "branch": "main",
+      "commits": 10,
+      "releases": 0,
+      "code_lines": 113
+    },
+    {
+      "name": "TopologyBuilder",
+      "branch": "Mjonyr",
+      "commits": 148,
+      "releases": 3,
+      "code_lines": 19318
+    }
+  ]
+}

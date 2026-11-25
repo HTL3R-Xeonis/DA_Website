@@ -5,10 +5,26 @@
     <script>(function(){try{if(localStorage.getItem('xeonis-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}})();</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xeonis | HTL 3 Rennweg Diplomarbeit</title>
-    <meta name="description"
-          content="Landingpage für Xeonis, eine HTL-Diplomarbeit rund um Virtualisierung, Automatisierung, Hardware, Server und LLMs.">
+    <meta name="description" content="Xeonis ist eine Diplomarbeit der HTL 3 Rennweg: Wir planen, bauen und testen virtuelle Netzwerktopologien automatisiert. Virtualisierung trifft Automatisierung.">
     <link rel="stylesheet" href="css/style.css?v=2">
     <link rel="stylesheet" href="css/rack.css?v=1">
+    <link rel="stylesheet" href="css/results.css?v=1">
+    <link rel="canonical" href="https://xeonis.dev/">
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="theme-color" content="#000000">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Xeonis">
+    <meta property="og:locale" content="de_AT">
+    <meta property="og:title" content="Xeonis | HTL 3 Rennweg Diplomarbeit">
+    <meta property="og:description" content="Xeonis ist eine Diplomarbeit der HTL 3 Rennweg: Wir planen, bauen und testen virtuelle Netzwerktopologien automatisiert. Virtualisierung trifft Automatisierung.">
+    <meta property="og:url" content="https://xeonis.dev/">
+    <meta property="og:image" content="https://xeonis.dev/assets/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Xeonis: Virtualisierung trifft Automatisierung.">
+    <meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
 <header class="site-header">
@@ -170,6 +186,61 @@
         </div>
     </section>
 
+    <section class="section" id="ergebnis">
+        <div class="container">
+            <div class="section-heading reveal">
+                <p class="eyebrow">Ergebnis</p>
+                <h2>Ginnungagap</h2>
+                <p class="goals__intro">
+                    Aus Xeonis ist Ginnungagap entstanden: eine Appliance, die virtuelle Netzwerktopologien plant, aufbaut und testet.
+                    Alle Komponenten sind Open Source.
+                </p>
+            </div>
+
+            <ul class="result-grid">
+                <li class="reveal"><a class="result-card" href="https://github.com/HTL3R-Xeonis/Ginnungagap-Appliance" target="_blank" rel="noopener noreferrer"><span class="result-name">Ginnungagap Appliance</span><span class="result-role">Fertiges Image mit allen Diensten, Installation und Updates</span></a></li>
+                <li class="reveal"><a class="result-card" href="https://github.com/HTL3R-Xeonis/Igdrasyl" target="_blank" rel="noopener noreferrer"><span class="result-name">Igdrasyl</span><span class="result-role">Web-Oberfläche zum Entwerfen, Aufbauen und Verwalten</span></a></li>
+                <li class="reveal"><a class="result-card" href="https://github.com/HTL3R-Xeonis/TopologyBuilder/tree/Mjonyr" target="_blank" rel="noopener noreferrer"><span class="result-name">Mjonyr (TopologyBuilder)</span><span class="result-role">Baut die Topologien auf ESXi und GNS3 auf</span></a></li>
+                <li class="reveal"><a class="result-card" href="https://github.com/HTL3R-Xeonis/Mimyr" target="_blank" rel="noopener noreferrer"><span class="result-name">Mimyr</span><span class="result-role">Entwirft Topologien aus einer Beschreibung mit einem Sprachmodell</span></a></li>
+                <li class="reveal"><a class="result-card" href="https://github.com/HTL3R-Xeonis/Hugyn-and-Munyn" target="_blank" rel="noopener noreferrer"><span class="result-name">Hugyn and Munyn</span><span class="result-role">Template-Dienste für ESXi und GNS3</span></a></li>
+                <li class="reveal"><a class="result-card" href="https://github.com/HTL3R-Xeonis/SecurityPipeline" target="_blank" rel="noopener noreferrer"><span class="result-name">SecurityPipeline</span><span class="result-role">Prüft Topologien automatisiert und erstellt einen Report</span></a></li>
+            </ul>
+
+            <p class="result-actions reveal">
+                <a class="btn btn-primary" href="https://github.com/HTL3R-Xeonis" target="_blank" rel="noopener noreferrer">Alles auf GitHub ansehen</a>
+            </p>
+        </div>
+    </section>
+
+    <section class="section" id="status">
+        <div class="container">
+            <div class="section-heading reveal">
+                <p class="eyebrow">Projektstatus</p>
+                <h2>In Zahlen</h2>
+            </div>
+
+            <h3 class="stats-group reveal">Hardware</h3>
+            <div class="stats-grid stats-grid--auto reveal" id="hwGrid">
+                <div class="stat" hidden><span class="stat-value" data-hw="servers">–</span><span class="stat-label">Server</span></div>
+                <div class="stat" hidden><span class="stat-value" data-hw="storage_tb">–</span><span class="stat-label">TB Speicher</span></div>
+                <div class="stat" hidden><span class="stat-value" data-hw="ram_gb">–</span><span class="stat-label">GB Arbeitsspeicher</span></div>
+            </div>
+
+            <h3 class="stats-group reveal">Software auf GitHub</h3>
+            <div class="stats-grid reveal" id="statsGrid">
+                <div class="stat"><span class="stat-value" data-stat="repos">–</span><span class="stat-label">Repositories</span></div>
+                <div class="stat"><span class="stat-value" data-stat="commits">–</span><span class="stat-label">Commits</span></div>
+                <div class="stat"><span class="stat-value" data-stat="code_lines">–</span><span class="stat-label">Zeilen Code</span></div>
+                <div class="stat"><span class="stat-value" data-stat="test_lines">–</span><span class="stat-label">davon Tests</span></div>
+                <div class="stat"><span class="stat-value" data-stat="releases">–</span><span class="stat-label">Releases</span></div>
+                <div class="stat"><span class="stat-value" data-stat="contributors">–</span><span class="stat-label">Mitwirkende</span></div>
+            </div>
+            <div class="lang-bar reveal" id="langBar" role="img" aria-label="Anteile der Programmiersprachen"></div>
+            <ul class="lang-legend" id="langLegend"></ul>
+            <p class="stats-note">Software: öffentliche Repositories auf GitHub, Stand <span id="statsDate">–</span>.</p>
+        </div>
+    </section>
+
     <section class="section" id="rackplan">
         <div class="container">
             <div class="section-heading reveal">
@@ -181,8 +252,8 @@
                 <div class="rack-viewer">
                     <div class="rack-stage" id="rackStage" tabindex="0"
                          role="group" aria-label="3D-Ansicht des Racks, mit Maus, Finger oder Pfeiltasten drehbar">
-                        <div class="rack-floor" aria-hidden="true"></div>
                         <div class="rack-3d" id="rack3d"></div>
+                        <svg class="rack-drag-hint" viewBox="0 0 64 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="hint-arrows"><path d="M20 12H4M10 6l-6 6 6 6"/><path d="M44 12h16M54 6l6 6-6 6"/></g><circle cx="32" cy="12" r="3.2" fill="currentColor" stroke="none"/></svg>
                         <noscript><img src="assets/rack/rack-front.webp" width="930" height="2977" alt="Rack von vorne" style="height:100%;width:auto"></noscript>
                     </div>
                 </div>
@@ -201,7 +272,7 @@
 
             <div class="hardware-grid">
                 <figure class="hardware-card reveal">
-                    <img class="hardware-img" src="assets/Serverrack.jpeg" alt="Serverrack">
+                    <img width="975" height="1600" class="hardware-img" src="assets/Serverrack.jpeg" alt="Serverrack">
                     <figcaption>
                         <h3>Serverrack</h3>
                         <p>Unser eigenes Hardwareassembly im Serverraum.</p>
@@ -209,7 +280,7 @@
                 </figure>
 
                 <figure class="hardware-card reveal">
-                    <img class="hardware-img" src="assets/UCS.png" alt="UCS">
+                    <img width="823" height="476" class="hardware-img" src="assets/UCS.webp" alt="UCS">
                     <figcaption>
                         <h3>UCS 5108</h3>
                         <p>Blade-Chassis mit 8 Servern &ndash; ein Grundbaustein unseres UCS-Systems.</p>
@@ -217,7 +288,7 @@
                 </figure>
 
                 <figure class="hardware-card reveal">
-                    <img class="hardware-img" src="assets/server.png" alt="Server">
+                    <img width="883" height="758" class="hardware-img" src="assets/server.webp" alt="Server">
                     <figcaption>
                         <h3>Weitere Server</h3>
                         <p>Weitere Leistung für unseren internen Speicher, Services, einem lokalem LLM, etc.</p>
@@ -237,16 +308,15 @@
             <div class="sponsor-logos">
                 <figure class="sponsor-logo reveal">
                     <a href="https://www.printshop-landstrasse.at" target="_blank" rel="noopener noreferrer" aria-label="Zur Website von Printshop Landstraße">
-                        <img src="assets/logo_printshop_landstr.png" alt="Printshop Landstraße">
+                        <img width="400" height="114" src="assets/logo_printshop_landstr.webp" alt="Printshop Landstraße">
                     </a>
                 </figure>
 
                 <figure class="sponsor-logo reveal">
                     <a href="https://www.limesoda.com" target="_blank" rel="noopener noreferrer" aria-label="Zur Website von LimeSoda">
-                        <img src="assets/logo_limesoda.jpg" alt="LimeSoda">
+                        <img width="1032" height="302" src="assets/logo_limesoda.jpg" alt="LimeSoda">
                     </a>
                 </figure>
-            </div>
             </div>
         </div>
     </section>
@@ -268,6 +338,7 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script src="js/stats.js"></script>
 <script src="js/rack.js"></script>
 </body>
 </html>

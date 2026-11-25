@@ -1,0 +1,154 @@
+/* Ergebnis (Komponenten) und Projektstatus (GitHub-Zahlen) */
+
+.result-grid {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 2.5rem;
+}
+
+.result-card {
+    display: block;
+    height: 100%;
+    padding: 1.4rem 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+}
+
+.result-card:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.result-name {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.result-role {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--text-secondary);
+}
+
+.result-actions {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+/* Statistik */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 2.5rem;
+}
+
+.stats-group {
+    margin: 2.5rem 0 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--text-tertiary);
+}
+
+.stats-group + .stats-grid {
+    margin-top: 1rem;
+}
+
+/* Hardware: es werden nur Zahlen gezeigt, die eingetragen sind; die Karten teilen sich die Breite */
+.stats-grid--auto {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 280px));
+    justify-content: center;
+}
+
+.stat[hidden] {
+    display: none;
+}
+
+.stat {
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+    display: block;
+    margin-top: 0.4rem;
+    color: var(--text-secondary);
+}
+
+.lang-bar {
+    display: flex;
+    height: 0.9rem;
+    margin-top: 1.5rem;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--surface-strong);
+}
+
+.lang-bar span {
+    display: block;
+    height: 100%;
+}
+
+.lang-legend {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem 1.4rem;
+    margin-top: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.lang-legend li::before {
+    content: "";
+    display: inline-block;
+    width: 0.65rem;
+    height: 0.65rem;
+    margin-right: 0.45rem;
+    border-radius: 50%;
+    background: var(--dot, var(--accent));
+}
+
+.stats-note {
+    margin-top: 1.25rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+}
+
+@media (max-width: 920px) {
+    .result-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 560px) {
+    .result-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid:not(.stats-grid--auto) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

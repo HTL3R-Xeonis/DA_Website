@@ -1,11 +1,12 @@
 /* Rackplan: drehbares 3D-Rack (reines CSS 3D, keine Bibliothek).
-   Jedes Gerät ist ein eigener Körper mit eigener Tiefe; Vorder- und Rückseite sind Ausschnitte aus dem Rackplan. */
+   Jedes Gerät ist ein eigener Körper mit eigener Tiefe; Vorder- und Rückseite sind Ausschnitte aus dem Rackplan.
+   Boden, Gehäuse, Füße, Steckdosenleisten und Kabel sind schematisch nachgebaut (js/rack.js). */
 
 .rack-layout {
-    --rack-h: min(80vh, 900px);
+    --rack-h: min(72vh, 860px);
     --rack-w: calc(var(--rack-h) * 0.3124); /* Seitenverhältnis der Rack-Bilder (930 x 2977) */
 
-    /* Rack: Standardmaße 600 x 1000 mm; Tiefen der Geräte in js/rack.js (geschätzt, bitte nachmessen) */
+    /* Rack: Standardmaße 600 x 1000 mm (die Tiefe setzt js/rack.js); Tiefen der Geräte ebenfalls in js/rack.js */
     --rack-width-mm: 600;
     --rack-depth-mm: 1000;
     --mm: calc(var(--rack-w) / var(--rack-width-mm)); /* Länge eines Millimeters auf dem Bildschirm */
@@ -13,10 +14,24 @@
     --mount-front-mm: 45; /* Abstand der vorderen Montageschienen von der Vorderkante */
     --mount-back-mm: 45; /* Abstand der hinteren Schienen von der Hinterkante */
     --zf: calc(var(--rack-d) / 2 - var(--mount-front-mm) * var(--mm)); /* Ebene, an der die Gerätefronten sitzen */
+    --foot-h: calc(var(--rack-h) * 0.022);
+    --body-h: calc(var(--rack-h) - var(--foot-h));
 
     --rack-edge: rgba(255, 255, 255, 0.08);
     --rack-rail: #26262b;
     --rack-tick: rgba(255, 255, 255, 0.22);
+
+    /* Beleuchtung: wird von js/rack.js je nach Drehwinkel gesetzt (0 = unverändert) */
+    --sh-f: 0;
+    --sh-b: 0;
+    --sh-l: 0;
+    --sh-r: 0;
+    --sh-t: 0;
+    --hi-f: 0;
+    --hi-b: 0;
+    --hi-l: 0;
+    --hi-r: 0;
+    --hi-t: 0;
 
     display: grid;
     grid-template-columns: minmax(300px, 460px) 1fr;
@@ -27,19 +42,17 @@
 .rack-viewer {
     position: sticky;
     top: calc(var(--header-height) + 1rem);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
 }
 
 .rack-stage {
     position: relative;
     width: 100%;
-    height: calc(var(--rack-h) + 2.5rem);
+    height: calc(var(--rack-h) + 7rem); /* unten Platz für den Boden */
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
+    padding-top: 1.5rem;
+    box-sizing: border-box;
     perspective: 1800px;
     perspective-origin: 50% 40%;
     border-radius: var(--radius-lg);
@@ -63,18 +76,6 @@
     outline-offset: 3px;
 }
 
-.rack-floor {
-    position: absolute;
-    left: 50%;
-    bottom: 1.1rem;
-    width: calc(var(--rack-d) * 1.1);
-    height: calc(var(--rack-d) * 0.28);
-    transform: translateX(-50%);
-    border-radius: 50%;
-    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.5), transparent 70%);
-    pointer-events: none;
-}
-
 .rack-3d {
     position: relative;
     width: var(--rack-w);
@@ -88,11 +89,95 @@
     position: absolute;
 }
 
+/* Boden des Serverraums: Doppelboden mit 600-mm-Platten, läuft nach außen aus */
+.rack-floor3d {
+    --fl: calc(3600 * var(--mm));
+    left: calc(50% - var(--fl) / 2);
+    width: var(--fl);
+    height: var(--fl);
+    top: calc(var(--rack-h) + 1px - var(--fl) / 2);
+    transform: rotateX(90deg);
+    background:
+        linear-gradient(color-mix(in srgb, var(--text) 34%, transparent) 1px, transparent 1px) 0 0 / calc(600 * var(--mm)) calc(600 * var(--mm)),
+        linear-gradient(90deg, color-mix(in srgb, var(--text) 34%, transparent) 1px, transparent 1px) 0 0 / calc(600 * var(--mm)) calc(600 * var(--mm)),
+        color-mix(in srgb, var(--text) 9%, transparent);
+    -webkit-mask: radial-gradient(circle closest-side, #000 30%, transparent 100%);
+    mask: radial-gradient(circle closest-side, #000 30%, transparent 100%);
+    pointer-events: none;
+}
+
+/* Schatten auf dem Boden: Teil der Szene, dreht sich mit */
+.rack-shadow {
+    left: -30%;
+    width: 160%;
+    height: calc(var(--rack-d) * 1.45);
+    top: calc(var(--rack-h) - var(--rack-d) * 0.725);
+    transform: rotateX(90deg);
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.28) 38%, transparent 68%);
+    pointer-events: none;
+}
+
+/* Beleuchtungs-Überzug: eine Lage dunkler (Schatten) und eine Lage heller (Glanz) */
+.rack-wall-left::after,
+.rack-wall-right::after,
+.rack-wall-top::after,
+.dev-front::before,
+.dev-back::before,
+.dev-left::after,
+.dev-right::after,
+.dev-top::after,
+.s-front::after,
+.s-back::after,
+.s-left::after,
+.s-right::after,
+.s-top::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(rgba(255, 255, 255, var(--hi)), rgba(255, 255, 255, var(--hi))),
+        linear-gradient(rgba(0, 0, 0, var(--sh)), rgba(0, 0, 0, var(--sh)));
+}
+
+.dev-front::before,
+.s-front::after {
+    --sh: var(--sh-f);
+    --hi: var(--hi-f);
+}
+
+.dev-back::before,
+.s-back::after {
+    --sh: var(--sh-b);
+    --hi: var(--hi-b);
+}
+
+.rack-wall-left::after,
+.dev-left::after,
+.s-left::after {
+    --sh: var(--sh-l);
+    --hi: var(--hi-l);
+}
+
+.rack-wall-right::after,
+.dev-right::after,
+.s-right::after {
+    --sh: var(--sh-r);
+    --hi: var(--hi-r);
+}
+
+.rack-wall-top::after,
+.dev-top::after,
+.s-top::after {
+    --sh: var(--sh-t);
+    --hi: var(--hi-t);
+}
+
 /* Gehäuse: glatte, matte Bleche (vorne und hinten offen) */
 .rack-wall-left,
 .rack-wall-right {
     top: 0;
-    height: 100%;
+    height: var(--body-h);
     width: var(--rack-d);
     left: calc((var(--rack-w) - var(--rack-d)) / 2);
     background: linear-gradient(90deg, #101012, #1c1c20 50%, #101012);
@@ -112,11 +197,29 @@
     left: 0;
     width: 100%;
     height: var(--rack-d);
-    top: calc((var(--rack-h) - var(--rack-d)) / 2);
-    transform: rotateX(90deg) translateZ(calc(var(--rack-h) / 2));
+    top: calc((var(--body-h) - var(--rack-d)) / 2);
+    transform: rotateX(90deg) translateZ(calc(var(--body-h) / 2));
     background: linear-gradient(180deg, #232327, #151518);
     box-shadow: inset 0 0 0 1px var(--rack-edge);
     pointer-events: none;
+}
+
+/* Rahmen vorne und hinten: Holme und Querstreben */
+.rack-ring {
+    inset: 0 0 var(--foot-h) 0;
+    box-sizing: border-box;
+    border-style: solid;
+    border-color: #0d0d0f;
+    border-width: calc(var(--rack-h) * 0.03) calc(var(--rack-w) * 0.045);
+    pointer-events: none;
+}
+
+.rack-ring--front {
+    transform: translateZ(calc(var(--rack-d) / 2));
+}
+
+.rack-ring--back {
+    transform: translateZ(calc(var(--rack-d) / -2));
 }
 
 /* Montageschienen mit Markierung je Höheneinheit (vorne und hinten, links und rechts) */
@@ -137,7 +240,7 @@
 
 .rack-rail--fr,
 .rack-rail--br {
-    right: 12.4%;
+    right: 8.2%;
 }
 
 .rack-rail--fl,
@@ -148,6 +251,113 @@
 .rack-rail--bl,
 .rack-rail--br {
     transform: translateZ(calc(var(--rack-d) / -2 + var(--mount-back-mm) * var(--mm)));
+}
+
+/* allgemeiner Körper (Füße, Steckdosenleisten): Maße über --bw / --bh / --bd */
+.solid {
+    width: var(--bw);
+    height: var(--bh);
+    transform-style: preserve-3d;
+}
+
+.solid > i {
+    position: absolute;
+    display: block;
+    background: var(--fill, #17171a);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    pointer-events: none;
+}
+
+.s-front,
+.s-back {
+    inset: 0;
+}
+
+.s-front {
+    transform: translateZ(calc(var(--bd) / 2));
+}
+
+.s-back {
+    transform: rotateY(180deg) translateZ(calc(var(--bd) / 2));
+}
+
+.s-left,
+.s-right {
+    top: 0;
+    height: 100%;
+    width: var(--bd);
+    left: calc((var(--bw) - var(--bd)) / 2);
+}
+
+.s-left {
+    transform: rotateY(-90deg) translateZ(calc(var(--bw) / 2));
+}
+
+.s-right {
+    transform: rotateY(90deg) translateZ(calc(var(--bw) / 2));
+}
+
+.s-top {
+    left: 0;
+    width: 100%;
+    height: var(--bd);
+    top: calc((var(--bh) - var(--bd)) / 2);
+    transform: rotateX(90deg) translateZ(calc(var(--bh) / 2));
+}
+
+.solid--foot {
+    --fill: #0c0c0e;
+}
+
+/* Steckdosenleiste: hell, mit Steckplätzen an der Innenseite */
+.solid--pdu {
+    --fill: #d9d9dd;
+}
+
+.solid--pdu .pdu-sockets {
+    background:
+        repeating-linear-gradient(180deg, transparent 0 calc(var(--rack-h) * 0.004), #25252a calc(var(--rack-h) * 0.004) calc(var(--rack-h) * 0.019), transparent calc(var(--rack-h) * 0.019) calc(var(--rack-h) * 0.0235)) 50% 0 / 55% 100% no-repeat,
+        #cfcfd4;
+}
+
+/* Kabel: geschwungene Verläufe in Ebenen hinter dem Rack (SVG), dazu schräge Streifen entlang der Tiefe vom Gerät zur Ebene */
+.cab-plane {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.cab {
+    --c: #2f6fd6;
+    background: repeating-linear-gradient(60deg, var(--c) 0 3px, color-mix(in srgb, var(--c) 62%, #fff) 3px 5px);
+    pointer-events: none;
+}
+
+.cab--net {
+    --c: #2f6fd6;
+}
+
+.cab--fc {
+    --c: #2fbfbf;
+}
+
+.cab--pwr {
+    --c: #35353c;
+}
+
+.cab--sas {
+    --c: #6a6a74;
+}
+
+.cab--yel {
+    --c: #e4c43a;
+}
+
+.cab--wht {
+    --c: #e6e6ea;
 }
 
 /* ein Gerät als Körper: Breite 19 Zoll, Höhe nach HE, Tiefe nach Gerät */
@@ -187,9 +397,18 @@
     transform: translateZ(calc(var(--dd) / 2));
 }
 
+.rack-3d:not(.show-back) .dev-back {
+    background-image: none; /* Rückseitenbild (1,8 MB) wird erst beim Drehen geladen */
+}
+
 .dev-back {
     background-image: url("../assets/rack/rack-back.webp");
     transform: rotateY(180deg) translateZ(calc(var(--dd) / 2));
+}
+
+.dev-front::before,
+.dev-back::before {
+    z-index: 1;
 }
 
 .dev-left,
@@ -231,6 +450,7 @@
     content: "";
     position: absolute;
     inset: 0;
+    z-index: 2;
     background: color-mix(in srgb, var(--accent) 30%, transparent);
     box-shadow: inset 0 0 0 2px var(--accent);
 }
@@ -239,6 +459,39 @@
 .dev.is-active .dev-right,
 .dev.is-active .dev-top {
     background: color-mix(in srgb, var(--accent) 45%, #1c1c20);
+}
+
+/* Bedienhinweis: Pfeile links und rechts, ohne Text; verschwindet nach dem ersten Drehen */
+.rack-drag-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 0.9rem;
+    width: 4.2rem;
+    height: auto;
+    transform: translateX(-50%);
+    color: var(--text-secondary);
+    opacity: 0.85;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+}
+
+.rack-stage.is-used .rack-drag-hint {
+    opacity: 0;
+}
+
+.rack-drag-hint .hint-arrows {
+    animation: rack-nudge 2.4s ease-in-out infinite;
+}
+
+@keyframes rack-nudge {
+    0%,
+    100% {
+        transform: translateX(-3px);
+    }
+
+    50% {
+        transform: translateX(3px);
+    }
 }
 
 /* Geräteliste */
@@ -317,5 +570,9 @@
 @media (prefers-reduced-motion: reduce) {
     .rack-item {
         transition: none;
+    }
+
+    .rack-drag-hint .hint-arrows {
+        animation: none;
     }
 }

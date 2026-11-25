@@ -1,0 +1,40 @@
+name: GitHub statistics
+
+# Erzeugt täglich data/github-stats.json (Zahlen für den Abschnitt "Projektstatus" der Startseite) und committet sie,
+# wenn sich etwas geändert hat. Gezählt werden nur öffentliche Repositories der Organisation.
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Build the statistics
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/build_github_stats.py
+
+      - name: Commit the file if it changed
+        run: |
+          if git diff --quiet -- data/github-stats.json; then
+            echo "Keine Änderung."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/github-stats.json
+          git commit -m "update the github statistics"
+          git push
