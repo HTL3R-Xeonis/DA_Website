@@ -1,17 +1,33 @@
-/* Rackplan: drehbares 3D-Rack (reines CSS 3D, keine Bibliothek) */
+/* Rackplan: drehbares 3D-Rack (reines CSS 3D, keine Bibliothek).
+   Jedes Gerät ist ein eigener Körper mit eigener Tiefe; Vorder- und Rückseite sind Ausschnitte aus dem Rackplan. */
 
 .rack-layout {
     --rack-h: min(80vh, 900px);
     --rack-w: calc(var(--rack-h) * 0.3124); /* Seitenverhältnis der Rack-Bilder (930 x 2977) */
-    /* Tiefe des Racks in mm (geschätzt: Standard-Rack 600 x 1000 mm; das tiefste Gerät, das UCS-5108-Chassis, ist ca. 80 cm tief).
-       Zum Nachmessen einfach den Wert anpassen. */
+
+    /* Rack: Standardmaße 600 x 1000 mm; Tiefen der Geräte in js/rack.js (geschätzt, bitte nachmessen) */
     --rack-width-mm: 600;
     --rack-depth-mm: 1000;
-    --rack-d: calc(var(--rack-w) * var(--rack-depth-mm) / var(--rack-width-mm));
+    --mm: calc(var(--rack-w) / var(--rack-width-mm)); /* Länge eines Millimeters auf dem Bildschirm */
+    --rack-d: calc(var(--rack-depth-mm) * var(--mm));
+    --mount-front-mm: 45; /* Abstand der vorderen Montageschienen von der Vorderkante */
+    --mount-back-mm: 45; /* Abstand der hinteren Schienen von der Hinterkante */
+    --zf: calc(var(--rack-d) / 2 - var(--mount-front-mm) * var(--mm)); /* Ebene, an der die Gerätefronten sitzen */
+
+    --rack-glass: rgba(255, 255, 255, 0.045);
+    --rack-edge: rgba(255, 255, 255, 0.2);
+    --rack-rail: #26262b;
+    --rack-tick: rgba(255, 255, 255, 0.22);
+
     display: grid;
     grid-template-columns: minmax(300px, 460px) 1fr;
     gap: 3rem;
     align-items: start;
+}
+
+:root[data-theme="light"] .rack-layout {
+    --rack-glass: rgba(0, 0, 0, 0.04);
+    --rack-edge: rgba(0, 0, 0, 0.22);
 }
 
 .rack-viewer {
@@ -74,79 +90,161 @@
     will-change: transform;
 }
 
-.rack-face {
+.rack-3d > * {
     position: absolute;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
 }
 
-.rack-face--front,
-.rack-face--back {
-    inset: 0;
-}
-
-.rack-face--front {
-    transform: translateZ(calc(var(--rack-d) / 2));
-}
-
-.rack-face--back {
-    transform: rotateY(180deg) translateZ(calc(var(--rack-d) / 2));
-}
-
-.rack-face img {
-    width: 100%;
-    height: 100%;
-    object-fit: fill;
-    pointer-events: none;
-    -webkit-user-drag: none;
-}
-
-/* Seiten und Deckel des Racks: glatte, matte Stahlbleche ohne Muster */
-.rack-face--left,
-.rack-face--right {
+/* Gehäuse: durchsichtige Seitenwände, damit man die Tiefe der Geräte sieht */
+.rack-wall-left,
+.rack-wall-right {
     top: 0;
-    width: var(--rack-d);
     height: 100%;
+    width: var(--rack-d);
     left: calc((var(--rack-w) - var(--rack-d)) / 2);
-    background: linear-gradient(90deg, #101012 0%, #1c1c20 50%, #101012 100%);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    background: var(--rack-glass);
+    box-shadow: inset 0 0 0 1px var(--rack-edge);
+    pointer-events: none;
 }
 
-.rack-face--left {
+.rack-wall-left {
     transform: rotateY(-90deg) translateZ(calc(var(--rack-w) / 2));
 }
 
-.rack-face--right {
+.rack-wall-right {
     transform: rotateY(90deg) translateZ(calc(var(--rack-w) / 2));
 }
 
-.rack-face--top {
+.rack-wall-top {
     left: 0;
     width: 100%;
     height: var(--rack-d);
     top: calc((var(--rack-h) - var(--rack-d)) / 2);
     transform: rotateX(90deg) translateZ(calc(var(--rack-h) / 2));
-    background: linear-gradient(180deg, #232327, #151518);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    background: var(--rack-glass);
+    box-shadow: inset 0 0 0 1px var(--rack-edge);
+    pointer-events: none;
 }
 
-/* klickbare Geräteflächen auf Vorder- und Rückseite */
-.rack-hit {
-    position: absolute;
+/* Montageschienen mit Markierung je Höheneinheit (vorne und hinten, links und rechts) */
+.rack-rail {
+    top: 3.4%;
+    height: 93.2%;
+    width: 4.6%;
+    background:
+        repeating-linear-gradient(180deg, var(--rack-tick) 0 1px, transparent 1px calc(var(--rack-h) * 0.021841)),
+        var(--rack-rail);
+    pointer-events: none;
+}
+
+.rack-rail--fl,
+.rack-rail--bl {
+    left: 5.2%;
+}
+
+.rack-rail--fr,
+.rack-rail--br {
+    right: 12.4%;
+}
+
+.rack-rail--fl,
+.rack-rail--fr {
+    transform: translateZ(var(--zf));
+}
+
+.rack-rail--bl,
+.rack-rail--br {
+    transform: translateZ(calc(var(--rack-d) / -2 + var(--mount-back-mm) * var(--mm)));
+}
+
+/* ein Gerät als Körper: Breite 19 Zoll, Höhe nach HE, Tiefe nach Gerät */
+.dev {
+    --dw: calc(var(--rack-w) * 0.769);
+    --dh: calc(var(--h) * var(--rack-h));
+    --dd: calc(var(--dm) * var(--mm));
     left: 10.3%;
     width: 76.9%;
-    padding: 0;
-    border: 0;
-    border-radius: 3px;
-    background: transparent;
-    cursor: pointer;
-    outline: none;
-    transition: background-color 0.25s ease, box-shadow 0.25s ease;
+    top: calc(var(--t) * 100%);
+    height: calc(var(--h) * 100%);
+    transform-style: preserve-3d;
+    transform: translateZ(calc(var(--zf) - var(--dd) / 2));
 }
 
-.rack-hit.is-active {
-    background: color-mix(in srgb, var(--accent) 26%, transparent);
-    box-shadow: 0 0 0 2px var(--accent), 0 0 18px color-mix(in srgb, var(--accent) 70%, transparent);
+.dev > * {
+    position: absolute;
+    padding: 0;
+    border: 0;
+    margin: 0;
+}
+
+.dev-front,
+.dev-back {
+    inset: 0;
+    background-repeat: no-repeat;
+    background-size: var(--rack-w) var(--rack-h);
+    background-position: calc(var(--rack-w) * -0.103) calc(var(--t) * var(--rack-h) * -1);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    cursor: pointer;
+    outline: none;
+}
+
+.dev-front {
+    background-image: url("../assets/rack/rack-front.webp");
+    transform: translateZ(calc(var(--dd) / 2));
+}
+
+.dev-back {
+    background-image: url("../assets/rack/rack-back.webp");
+    transform: rotateY(180deg) translateZ(calc(var(--dd) / 2));
+}
+
+.dev-left,
+.dev-right,
+.dev-top {
+    background: linear-gradient(90deg, #17171a, #232328 50%, #17171a);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+}
+
+.dev-left,
+.dev-right {
+    top: 0;
+    height: 100%;
+    width: var(--dd);
+    left: calc((100% - var(--dd)) / 2);
+}
+
+.dev-left {
+    transform: rotateY(-90deg) translateZ(calc(var(--dw) / 2));
+}
+
+.dev-right {
+    transform: rotateY(90deg) translateZ(calc(var(--dw) / 2));
+}
+
+.dev-top {
+    left: 0;
+    width: 100%;
+    height: var(--dd);
+    top: calc((100% - var(--dd)) / 2);
+    transform: rotateX(90deg) translateZ(calc(var(--dh) / 2));
+    background: linear-gradient(180deg, #2a2a30, #1c1c20);
+}
+
+/* gewähltes Gerät */
+.dev.is-active .dev-front::after,
+.dev.is-active .dev-back::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--accent) 30%, transparent);
+    box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.dev.is-active .dev-left,
+.dev.is-active .dev-right,
+.dev.is-active .dev-top {
+    background: color-mix(in srgb, var(--accent) 45%, #1c1c20);
 }
 
 .rack-controls {
@@ -189,7 +287,7 @@
 .rack-list {
     list-style: none;
     display: grid;
-    gap: 0.75rem;
+    gap: 0.6rem;
 }
 
 .rack-item {
@@ -210,7 +308,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 1rem 1.25rem;
+    padding: 0.8rem 1.25rem;
     border: 0;
     border-radius: inherit;
     background: transparent;
@@ -226,9 +324,15 @@
 }
 
 .rack-item-name {
+    display: block;
     font-weight: 600;
-    font-size: 1.05rem;
     letter-spacing: -0.01em;
+}
+
+.rack-item-meta {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
 }
 
 .rack-item-he {
@@ -238,25 +342,6 @@
     border: 1px solid var(--border);
     border-radius: 999px;
     padding: 0.15rem 0.7rem;
-}
-
-.rack-item-body {
-    display: none;
-    padding: 0 1.25rem 1.1rem;
-    color: var(--text-secondary);
-}
-
-.rack-item.is-active .rack-item-body {
-    display: block;
-}
-
-.rack-item-body p + p {
-    margin-top: 0.5rem;
-}
-
-.rack-item-pos {
-    font-size: 0.85rem;
-    color: var(--text-tertiary);
 }
 
 @media (max-width: 920px) {
@@ -272,7 +357,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .rack-hit,
     .rack-item {
         transition: none;
     }

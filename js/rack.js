@@ -1,4 +1,4 @@
-/* Rackplan: drehbares 3D-Rack mit klickbaren Geräten (keine Bibliothek, keine Hover-Effekte) */
+/* Rackplan: drehbares 3D-Rack, jedes Gerät mit eigener Tiefe (keine Bibliothek, keine Hover-Effekte) */
 (function () {
     'use strict';
 
@@ -9,168 +9,128 @@
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* Geometrie des Bildes (930 x 2977 px): Mitte von HE 42 und HE 1, daraus die Höhe einer HE */
+    /* Geometrie des Rack-Bildes (930 x 2977 px): Mitte von HE 42 und HE 1, daraus die Höhe einer HE */
     const IMG_H = 2977;
     const U42_CENTER = 128.4;
     const U1_CENTER = 2793;
     const PER_U = (U1_CENTER - U42_CENTER) / 41;
 
-    /* Geräte laut Rackplan (HE von oben gezählt wie im Rack; ranges = [oberste HE, unterste HE]) */
+    /* Geräte laut Rackplan. ranges = [oberste HE, unterste HE] (HE wie auf den Schienen, 42 oben).
+       depth = Gerätetiefe in mm, GESCHÄTZT nach Herstellerangaben und gerundet - bitte am echten Gerät nachmessen. */
     const DEVICES = [
-        {
-            id: 'catalyst',
-            name: 'Cisco Catalyst 4948',
-            ranges: [[40, 40]],
-            text: ['Switch des Racks (1 HE) für die Anbindung der Server.']
-        },
-        {
-            id: 'dl160',
-            name: 'HPE ProLiant DL160 Gen9',
-            ranges: [[39, 39]],
-            text: ['Server (1 HE). Gehört zu den weiteren Servern des Racks für internen Speicher, Services und das lokale LLM.']
-        },
+        { id: 'catalyst', name: 'Cisco Catalyst 4948', role: 'Switch', depth: 410, ranges: [[40, 40]] },
+        { id: 'dl160', name: 'HPE ProLiant DL160 Gen9', role: 'Server', depth: 620, ranges: [[39, 39]] },
         {
             id: 'vnx-dae',
             name: 'EMC VNX DAE',
+            role: 'Speicher-Erweiterung',
             count: '4 Stück',
-            ranges: [[37, 35], [34, 32], [31, 29], [11, 9]],
-            text: [
-                'Disk Array Enclosures (je 3 HE): zusätzliche Festplatten für den EMC-VNX-Speicher.',
-                'Der zusätzliche Speicher der Blade-Server kommt per Fibre Channel vom EMC VNX.'
-            ]
+            depth: 360,
+            ranges: [[37, 35], [34, 32], [31, 29], [11, 9]]
         },
         {
             id: 'vnx-dpe',
             name: 'EMC VNX5200 DPE',
+            role: 'Speicher-Controller',
             count: '2 Stück',
-            ranges: [[28, 26], [14, 12]],
-            text: ['Disk Processor Enclosures (je 3 HE): die Steuereinheiten des EMC-VNX-Speichersystems.']
+            depth: 610,
+            ranges: [[28, 26], [14, 12]]
         },
-        {
-            id: 'blende',
-            name: 'Rack-Blende',
-            ranges: [[24, 24]],
-            text: ['Blende (1 HE) zwischen Speicher und Servern für Luftführung und Optik.']
-        },
-        {
-            id: 'dl385',
-            name: 'HP ProLiant DL385 G7',
-            ranges: [[23, 22]],
-            text: ['Server (2 HE) mit sechs Einschüben an der Vorderseite.']
-        },
-        {
-            id: 'r730',
-            name: 'Dell PowerEdge R730',
-            ranges: [[21, 20]],
-            text: ['Server (2 HE) für Speicher, Services und das lokale LLM.']
-        },
-        {
-            id: 'powervault',
-            name: 'Dell PowerVault',
-            count: '5 Disk-Schubladen',
-            ranges: [[19, 15]],
-            text: ['Disk-Gehäuse (JBOD, 5 HE) mit fünf ausziehbaren Schubladen für viele Festplatten.']
-        },
+        { id: 'blende', name: 'Rack-Blende', role: 'Blende', depth: 20, ranges: [[24, 24]] },
+        { id: 'dl385', name: 'HP ProLiant DL385 G7', role: 'Server', depth: 700, ranges: [[23, 22]] },
+        { id: 'r730', name: 'Dell PowerEdge R730', role: 'Server', depth: 700, ranges: [[21, 20]] },
+        { id: 'powervault', name: 'Dell PowerVault', role: 'Disk-Gehäuse, 5 Schubladen', depth: 820, ranges: [[19, 15]] },
         {
             id: 'ucs-fi',
             name: 'Cisco UCS 6248UP',
+            role: 'Fabric Interconnect',
             count: '2 Stück',
-            ranges: [[8, 8], [7, 7]],
-            text: ['Fabric Interconnects (je 1 HE): verbinden das Blade-Chassis mit Netzwerk und Speicher. Hier läuft der UCS-Manager.']
+            depth: 760,
+            ranges: [[8, 8], [7, 7]]
         },
-        {
-            id: 'ucs-chassis',
-            name: 'Cisco UCS 5108 mit 8× B200 M2',
-            ranges: [[6, 1]],
-            text: [
-                'Blade-Chassis (6 HE) mit 8 Servern. Sie werden über den UCS-Manager mit Service-Profiles konfiguriert und als ESXi-Testumgebungen bereitgestellt.'
-            ]
-        }
+        { id: 'ucs-chassis', name: 'Cisco UCS 5108', role: 'Blade-Chassis, 8 Server', depth: 810, ranges: [[6, 1]] }
     ];
 
-    /* ---------- Hilfsfunktionen ---------- */
     function heLabel(range) {
-        return range[0] === range[1] ? 'HE ' + range[0] : 'HE ' + range[1] + '–' + range[0];
+        return range[0] === range[1] ? '' + range[0] : range[1] + '–' + range[0];
     }
 
     function heTotal(device) {
         return device.ranges.reduce((sum, r) => sum + (r[0] - r[1] + 1), 0);
     }
 
-    function band(range) {
-        const top = (U42_CENTER + (42 - range[0]) * PER_U - PER_U / 2) / IMG_H;
-        const height = ((range[0] - range[1] + 1) * PER_U) / IMG_H;
-        return { top: (top * 100).toFixed(3) + '%', height: (height * 100).toFixed(3) + '%' };
+    function el(tag, className) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        return node;
     }
 
-    /* ---------- Liste und klickbare Flächen aufbauen ---------- */
-    const hitsById = {};
+    /* ---------- Gehäuse: Seitenwände, Deckel, Schienen ---------- */
+    ['left', 'right', 'top'].forEach((side) => rack.appendChild(el('div', 'rack-wall-' + side)));
+    ['fl', 'fr', 'bl', 'br'].forEach((pos) => rack.appendChild(el('div', 'rack-rail rack-rail--' + pos)));
+
+    /* ---------- Geräte als Körper und Liste ---------- */
+    const boxesById = {};
     const itemsById = {};
+    let activeId = null;
+    let dragMoved = false;
 
     DEVICES.forEach((device) => {
-        hitsById[device.id] = [];
+        boxesById[device.id] = [];
 
-        const li = document.createElement('li');
-        li.className = 'rack-item';
-        li.dataset.device = device.id;
+        device.ranges.forEach((range) => {
+            const box = el('div', 'dev');
+            const top = (U42_CENTER + (42 - range[0]) * PER_U - PER_U / 2) / IMG_H;
+            const height = ((range[0] - range[1] + 1) * PER_U) / IMG_H;
+            box.style.setProperty('--t', top.toFixed(5));
+            box.style.setProperty('--h', height.toFixed(5));
+            box.style.setProperty('--dm', String(device.depth));
 
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.setAttribute('aria-expanded', 'false');
-        button.innerHTML =
-            '<span class="rack-item-name"></span><span class="rack-item-he"></span>';
-        button.querySelector('.rack-item-name').textContent = device.name;
-        button.querySelector('.rack-item-he').textContent = device.count || heTotal(device) + ' HE';
+            ['front', 'back'].forEach((side) => {
+                const face = el('button', 'dev-' + side);
+                face.type = 'button';
+                face.tabIndex = -1;
+                face.setAttribute('aria-label', device.name + ' auswählen');
+                face.addEventListener('click', () => {
+                    if (dragMoved) return;
+                    select(device.id, false);
+                });
+                box.appendChild(face);
+            });
+            ['left', 'right', 'top'].forEach((side) => box.appendChild(el('div', 'dev-' + side)));
 
-        const body = document.createElement('div');
-        body.className = 'rack-item-body';
-        device.text.forEach((paragraph) => {
-            const p = document.createElement('p');
-            p.textContent = paragraph;
-            body.appendChild(p);
+            rack.appendChild(box);
+            boxesById[device.id].push(box);
         });
-        const pos = document.createElement('p');
-        pos.className = 'rack-item-pos';
-        pos.textContent = 'Einbau: ' + device.ranges.map(heLabel).join(', ') + ' (von 42 HE)';
-        body.appendChild(pos);
 
-        li.append(button, body);
+        const li = el('li', 'rack-item');
+        const button = el('button');
+        button.type = 'button';
+
+        const text = el('span');
+        const name = el('span', 'rack-item-name');
+        name.textContent = device.name;
+        const meta = el('span', 'rack-item-meta');
+        meta.textContent = device.role + ' · ca. ' + Math.round(device.depth / 10) + ' cm tief';
+        text.append(name, meta);
+
+        const badge = el('span', 'rack-item-he');
+        badge.textContent = (device.count ? device.count + ' · ' : '') + 'HE ' + device.ranges.map(heLabel).join(', ');
+
+        button.append(text, badge);
+        li.appendChild(button);
         list.appendChild(li);
         itemsById[device.id] = li;
 
         button.addEventListener('click', () => select(device.id, true));
-
-        ['front', 'back'].forEach((side) => {
-            const face = rack.querySelector('.rack-face--' + side);
-            device.ranges.forEach((range) => {
-                const hit = document.createElement('button');
-                hit.type = 'button';
-                hit.className = 'rack-hit';
-                hit.tabIndex = -1;
-                hit.setAttribute('aria-label', device.name + ' auswählen');
-                const b = band(range);
-                hit.style.top = b.top;
-                hit.style.height = b.height;
-                hit.addEventListener('click', () => {
-                    if (dragMoved) return;
-                    select(device.id, false);
-                });
-                face.appendChild(hit);
-                hitsById[device.id].push(hit);
-            });
-        });
     });
 
-    let activeId = null;
-
     function select(id, fromList) {
-        const same = activeId === id;
-        activeId = same && !fromList ? null : id;
+        activeId = activeId === id && !fromList ? null : id;
         Object.keys(itemsById).forEach((key) => {
             const on = key === activeId;
             itemsById[key].classList.toggle('is-active', on);
-            itemsById[key].querySelector('button').setAttribute('aria-expanded', String(on));
-            hitsById[key].forEach((hit) => hit.classList.toggle('is-active', on));
+            boxesById[key].forEach((box) => box.classList.toggle('is-active', on));
         });
         if (activeId && !fromList) {
             itemsById[activeId].scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
@@ -218,7 +178,7 @@
 
     const presets = {
         front: [-14, 4],
-        side: [-64, 6],
+        side: [-64, 10],
         back: [166, 4]
     };
     const controls = document.querySelectorAll('.rack-controls button');
@@ -234,7 +194,6 @@
     });
 
     let dragging = false;
-    let dragMoved = false;
     let lastX = 0;
     let lastY = 0;
     let startX = 0;

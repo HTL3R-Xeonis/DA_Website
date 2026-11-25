@@ -174,11 +174,7 @@
         <div class="container">
             <div class="section-heading reveal">
                 <p class="eyebrow">Rackplan</p>
-                <h2>Unser Rack in 3D</h2>
-                <p class="goals__intro">
-                    So ist unser Rack im Serverraum der HTL aufgebaut: 42 Höheneinheiten, vorne und hinten gezeigt.
-                    Ziehe das Rack mit der Maus oder dem Finger, um es zu drehen, und wähle ein Gerät im Rack oder in der Liste.
-                </p>
+                <h2>Unser Rack</h2>
             </div>
 
             <div class="rack-layout">
@@ -186,17 +182,8 @@
                     <div class="rack-stage" id="rackStage" tabindex="0"
                          role="group" aria-label="3D-Ansicht des Racks, mit Maus, Finger oder Pfeiltasten drehbar">
                         <div class="rack-floor" aria-hidden="true"></div>
-                        <div class="rack-3d" id="rack3d">
-                            <div class="rack-face rack-face--front">
-                                <img src="assets/rack/rack-front.webp" width="930" height="2977" alt="Rack von vorne: Switch, Server, EMC-Speicher, PowerVault und das UCS-Blade-Chassis" draggable="false">
-                            </div>
-                            <div class="rack-face rack-face--back">
-                                <img src="assets/rack/rack-back.webp" width="930" height="2977" alt="Rack von hinten mit den Anschlüssen und Netzteilen" loading="lazy" draggable="false">
-                            </div>
-                            <div class="rack-face rack-face--left" aria-hidden="true"></div>
-                            <div class="rack-face rack-face--right" aria-hidden="true"></div>
-                            <div class="rack-face rack-face--top" aria-hidden="true"></div>
-                        </div>
+                        <div class="rack-3d" id="rack3d"></div>
+                        <noscript><img src="assets/rack/rack-front.webp" width="930" height="2977" alt="Rack von vorne" style="height:100%;width:auto"></noscript>
                     </div>
                     <div class="rack-controls" role="group" aria-label="Ansicht wählen">
                         <button type="button" data-view="front" aria-pressed="true">Vorne</button>
