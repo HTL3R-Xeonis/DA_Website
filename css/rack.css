@@ -3,7 +3,11 @@
 .rack-layout {
     --rack-h: min(80vh, 900px);
     --rack-w: calc(var(--rack-h) * 0.3124); /* Seitenverhältnis der Rack-Bilder (930 x 2977) */
-    --rack-d: calc(var(--rack-w) * 1.5);
+    /* Tiefe des Racks in mm (geschätzt: Standard-Rack 600 x 1000 mm; das tiefste Gerät, das UCS-5108-Chassis, ist ca. 80 cm tief).
+       Zum Nachmessen einfach den Wert anpassen. */
+    --rack-width-mm: 600;
+    --rack-depth-mm: 1000;
+    --rack-d: calc(var(--rack-w) * var(--rack-depth-mm) / var(--rack-width-mm));
     display: grid;
     grid-template-columns: minmax(300px, 460px) 1fr;
     gap: 3rem;
@@ -97,17 +101,15 @@
     -webkit-user-drag: none;
 }
 
-/* Seiten und Deckel des Racks: einfache Stahlflächen, damit der Körper sichtbar ist */
+/* Seiten und Deckel des Racks: glatte, matte Stahlbleche ohne Muster */
 .rack-face--left,
 .rack-face--right {
     top: 0;
     width: var(--rack-d);
     height: 100%;
     left: calc((var(--rack-w) - var(--rack-d)) / 2);
-    background:
-        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 2px, transparent 2px 22px),
-        linear-gradient(90deg, #131316, #26262b 45%, #17171a);
-    box-shadow: inset 0 0 0 2px #0a0a0c;
+    background: linear-gradient(90deg, #101012 0%, #1c1c20 50%, #101012 100%);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 
 .rack-face--left {
@@ -124,10 +126,8 @@
     height: var(--rack-d);
     top: calc((var(--rack-h) - var(--rack-d)) / 2);
     transform: rotateX(90deg) translateZ(calc(var(--rack-h) / 2));
-    background:
-        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 18px),
-        linear-gradient(180deg, #2b2b30, #1a1a1d);
-    box-shadow: inset 0 0 0 2px #0a0a0c;
+    background: linear-gradient(180deg, #232327, #151518);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 
 /* klickbare Geräteflächen auf Vorder- und Rückseite */
