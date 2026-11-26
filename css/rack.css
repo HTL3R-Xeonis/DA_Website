@@ -1,6 +1,6 @@
 /* Rackplan: drehbares 3D-Rack (reines CSS 3D, keine Bibliothek).
    Jedes Gerät ist ein eigener Körper mit eigener Tiefe; Vorder- und Rückseite sind Ausschnitte aus dem Rackplan.
-   Boden, Gehäuse, Füße, Steckdosenleisten und Kabel sind schematisch nachgebaut (js/rack.js). */
+   Boden, Gehäuse, Füße und Steckdosenleisten sind schematisch nachgebaut (js/rack.js). */
 
 .rack-layout {
     --rack-h: min(72vh, 860px);
@@ -318,46 +318,6 @@
     background:
         repeating-linear-gradient(180deg, transparent 0 calc(var(--rack-h) * 0.004), #25252a calc(var(--rack-h) * 0.004) calc(var(--rack-h) * 0.019), transparent calc(var(--rack-h) * 0.019) calc(var(--rack-h) * 0.0235)) 50% 0 / 55% 100% no-repeat,
         #cfcfd4;
-}
-
-/* Kabel: geschwungene Verläufe in Ebenen hinter dem Rack (SVG), dazu schräge Streifen entlang der Tiefe vom Gerät zur Ebene */
-.cab-plane {
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-    pointer-events: none;
-}
-
-.cab {
-    --c: #2f6fd6;
-    background: repeating-linear-gradient(60deg, var(--c) 0 3px, color-mix(in srgb, var(--c) 62%, #fff) 3px 5px);
-    pointer-events: none;
-}
-
-.cab--net {
-    --c: #2f6fd6;
-}
-
-.cab--fc {
-    --c: #2fbfbf;
-}
-
-.cab--pwr {
-    --c: #35353c;
-}
-
-.cab--sas {
-    --c: #6a6a74;
-}
-
-.cab--yel {
-    --c: #e4c43a;
-}
-
-.cab--wht {
-    --c: #e6e6ea;
 }
 
 /* ein Gerät als Körper: Breite 19 Zoll, Höhe nach HE, Tiefe nach Gerät */

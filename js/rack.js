@@ -9,7 +9,6 @@
 
     const layout = rack.closest('.rack-layout');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const SVG_NS = 'http://www.w3.org/2000/svg';
 
     /* Rack-Maße in mm: Standard-Rack 600 x 1000, vordere und hintere Montageschienen je 45 mm von der Kante */
     const RACK_DEPTH = 1000;
@@ -25,25 +24,21 @@
     const PER_U = (U1_CENTER - U42_CENTER) / 41;
 
     /* Geräte laut Rackplan. ranges = [oberste HE, unterste HE] (HE wie auf den Schienen, 42 oben).
-       depth = Gerätetiefe in mm, GESCHÄTZT nach Herstellerangaben und gerundet - bitte am echten Gerät nachmessen.
-       cables = schematische Kabel auf der Rückseite: ['net'|'fc'|'sas', Zielgerät, Index des Ziels] oder ['pwr', 'r'|'l']
-       (rechte beziehungsweise linke Steckdosenleiste). Sie zeigen nur die Art der Verkabelung, nicht die echte Belegung. */
+       depth = Gerätetiefe in mm, GESCHÄTZT nach Herstellerangaben und gerundet - bitte am echten Gerät nachmessen. */
     const DEVICES = [
         {
             id: 'catalyst',
             name: 'Cisco Catalyst 4948',
             role: 'Switch',
             depth: 410,
-            ranges: [[40, 40]],
-            cables: [['net', 'top'], ['net', 'top'], ['net', 'top'], ['pwr', 'r'], ['pwr', 'l']]
+            ranges: [[40, 40]]
         },
         {
             id: 'dl160',
             name: 'HPE ProLiant DL160 Gen9',
             role: 'Server',
             depth: 620,
-            ranges: [[39, 39]],
-            cables: [['net', 'catalyst'], ['net', 'catalyst'], ['pwr', 'r'], ['pwr', 'l']]
+            ranges: [[39, 39]]
         },
         {
             id: 'vnx-dae',
@@ -51,8 +46,7 @@
             role: 'Speicher-Erweiterung',
             count: '4 Stück',
             depth: 360,
-            ranges: [[37, 35], [34, 32], [31, 29], [11, 9]],
-            cables: [['sas', 'vnx-dpe', [0, 0, 0, 1]], ['pwr', 'r'], ['pwr', 'l']]
+            ranges: [[37, 35], [34, 32], [31, 29], [11, 9]]
         },
         {
             id: 'vnx-dpe',
@@ -60,33 +54,29 @@
             role: 'Speicher-Controller',
             count: '2 Stück',
             depth: 610,
-            ranges: [[28, 26], [14, 12]],
-            cables: [['fc', 'ucs-fi', [0, 1]], ['fc', 'ucs-fi', [1, 0]], ['net', 'catalyst'], ['pwr', 'r'], ['pwr', 'l']]
+            ranges: [[28, 26], [14, 12]]
         },
-        { id: 'blende', name: 'Rack-Blende', role: 'Blende', depth: 20, ranges: [[24, 24]], cables: [] },
+        { id: 'blende', name: 'Rack-Blende', role: 'Blende', depth: 20, ranges: [[24, 24]] },
         {
             id: 'dl385',
             name: 'HP ProLiant DL385 G7',
             role: 'Server',
             depth: 700,
-            ranges: [[23, 22]],
-            cables: [['net', 'catalyst'], ['net', 'catalyst'], ['fc', 'ucs-fi', 0], ['fc', 'ucs-fi', 1], ['pwr', 'r'], ['pwr', 'l']]
+            ranges: [[23, 22]]
         },
         {
             id: 'r730',
             name: 'Dell PowerEdge R730',
             role: 'Server',
             depth: 700,
-            ranges: [[21, 20]],
-            cables: [['net', 'catalyst'], ['net', 'catalyst'], ['net', 'catalyst'], ['fc', 'ucs-fi', 0], ['fc', 'ucs-fi', 1], ['pwr', 'r'], ['pwr', 'l']]
+            ranges: [[21, 20]]
         },
         {
             id: 'powervault',
             name: 'Dell PowerVault',
             role: 'Disk-Gehäuse, 5 Schubladen',
             depth: 820,
-            ranges: [[19, 15]],
-            cables: [['sas', 'dl385'], ['sas', 'r730'], ['pwr', 'r'], ['pwr', 'l']]
+            ranges: [[19, 15]]
         },
         {
             id: 'ucs-fi',
@@ -94,16 +84,14 @@
             role: 'Fabric Interconnect',
             count: '2 Stück',
             depth: 760,
-            ranges: [[8, 8], [7, 7]],
-            cables: [['net', 'catalyst'], ['net', 'catalyst'], ['fc', 'ucs-chassis'], ['fc', 'ucs-chassis'], ['pwr', 'r'], ['pwr', 'l']]
+            ranges: [[8, 8], [7, 7]]
         },
         {
             id: 'ucs-chassis',
             name: 'Cisco UCS 5108',
             role: 'Blade-Chassis, 8 Server',
             depth: 810,
-            ranges: [[6, 1]],
-            cables: [['pwr', 'r'], ['pwr', 'r'], ['pwr', 'l'], ['pwr', 'l']]
+            ranges: [[6, 1]]
         }
     ];
 
@@ -205,100 +193,9 @@
         solid('solid--pdu', { left: '0.8%', top: '36%', bw: 'calc(var(--rack-w) * 0.04)', bh: 'calc(var(--rack-h) * 0.56)', bd: mm(45), z: PDU_Z, sockets: 'right' });
         solid('solid--pdu', { left: '95.2%', top: '36%', bw: 'calc(var(--rack-w) * 0.04)', bh: 'calc(var(--rack-h) * 0.56)', bd: mm(45), z: PDU_Z, sockets: 'left' });
 
-        /* ---------- Kabel: Ebenen mit geschwungenen Verläufen, dazu Streifen entlang der Tiefe ---------- */
-        const PX = 9.3; /* 930 Einheiten = 100 % der Rackbreite */
-        const PY = 29.77; /* 2977 Einheiten = 100 % der Rackhöhe */
-        const LAYER_Z = { pwr: -482, net: -472, sas: -467, fc: -462 }; /* hinter den hinteren Schienen, übereinander gestaffelt */
-        const CABLE = {
-            net: { color: '#2f6fd6', width: 9 },
-            fc: { color: '#2fbfbf', width: 8 },
-            sas: { color: '#8a8a94', width: 10 },
-            pwr: { color: '#2a2a31', width: 13 }
-        };
-        const layers = {};
-        Object.keys(LAYER_Z).forEach((type) => {
-            const svg = document.createElementNS(SVG_NS, 'svg');
-            svg.setAttribute('class', 'cab-plane');
-            svg.setAttribute('viewBox', '0 0 930 2977');
-            svg.setAttribute('preserveAspectRatio', 'none');
-            svg.style.transform = 'translateZ(' + mm(LAYER_Z[type]) + ')';
-            rack.appendChild(svg);
-            layers[type] = svg;
-        });
-
-        function svgPath(type, d, stroke, width, opacity) {
-            const path = document.createElementNS(SVG_NS, 'path');
-            path.setAttribute('d', d);
-            path.setAttribute('fill', 'none');
-            path.setAttribute('stroke', stroke);
-            path.setAttribute('stroke-width', String(width));
-            path.setAttribute('stroke-linecap', 'round');
-            path.setAttribute('stroke-linejoin', 'round');
-            if (opacity !== undefined) path.setAttribute('stroke-opacity', String(opacity));
-            layers[type].appendChild(path);
-        }
-
-        function drawCable(type, d) {
-            const spec = CABLE[type];
-            svgPath(type, d, '#000', spec.width + 4, 0.5);
-            if (type === 'pwr') svgPath(type, d, '#fff', spec.width + 2, 0.16);
-            svgPath(type, d, spec.color, spec.width);
-            svgPath(type, d, '#fff', Math.max(2, spec.width * 0.28), type === 'pwr' ? 0.16 : 0.28);
-        }
-
-        /* Streifen vom Geräterücken zur Kabelebene (damit die Kabel am richtigen Gerät hängen, auch beim Drehen) */
-        function feeder(type, xPct, yPct, z1, z2) {
-            const len = Math.abs(z1 - z2);
-            if (len < 4) return;
-            const strip = el('div', 'cab cab--' + type);
-            strip.style.width = 'calc(var(--rack-w) * 0.012)';
-            strip.style.height = mm(len);
-            strip.style.left = 'calc(' + xPct + '% - var(--rack-w) * 0.006)';
-            strip.style.top = 'calc(' + yPct + '% - ' + mm(len) + ' / 2)';
-            strip.style.transform = 'translateZ(' + mm((z1 + z2) / 2) + ') rotateZ(45deg) rotateX(90deg)';
-            rack.appendChild(strip);
-        }
-
-        /* Datenkabel von einem Gerät zu einem anderen: seitlich in eine Bahn, senkrecht entlang der Schienen, wieder hinein */
-        function dataCable(type, from, to, lane) {
-            const xs = from.x * PX;
-            const ys = from.y * PY;
-            const xd = to.x * PX;
-            const yd = to.y * PY;
-            const xl = lane * PX;
-            const dir = yd < ys ? -1 : 1;
-            let d;
-            if (Math.abs(yd - ys) < 190) {
-                d = 'M' + xs + ',' + ys + ' C' + xl + ',' + ys + ' ' + xl + ',' + yd + ' ' + xd + ',' + yd;
-            } else {
-                d =
-                    'M' + xs + ',' + ys +
-                    ' C' + (xs - 50) + ',' + ys + ' ' + xl + ',' + ys + ' ' + xl + ',' + (ys + dir * 90) +
-                    ' L' + xl + ',' + (yd - dir * 90) +
-                    ' C' + xl + ',' + yd + ' ' + (xd - 50) + ',' + yd + ' ' + xd + ',' + yd;
-            }
-            feeder(type, from.x, from.y, from.z, LAYER_Z[type]);
-            if (to.z !== undefined) feeder(type, to.x, to.y, to.z, LAYER_Z[type]);
-            drawCable(type, d);
-        }
-
-        /* Stromkabel zur Steckdosenleiste auf der jeweiligen Seite, mit etwas Durchhang */
-        function powerCable(side, from) {
-            const sgn = side === 'r' ? 1 : -1;
-            const xs = from.x * PX;
-            const ys = from.y * PY;
-            const xp = (side === 'r' ? 95.4 : 4.8) * PX;
-            const d = 'M' + xs + ',' + ys + ' C' + (xs + sgn * 60) + ',' + (ys + 100) + ' ' + (xp - sgn * 70) + ',' + (ys + 130) + ' ' + xp + ',' + (ys + 55);
-            feeder('pwr', from.x, from.y, from.z, LAYER_Z.pwr);
-            drawCable('pwr', d);
-        }
-
         /* ---------- Geräte als Körper und Liste ---------- */
-        const placed = {};
-
         DEVICES.forEach((device) => {
             boxesById[device.id] = [];
-            placed[device.id] = [];
 
             device.ranges.forEach((range) => {
                 const box = el('div', 'dev');
@@ -323,60 +220,7 @@
 
                 rack.appendChild(box);
                 boxesById[device.id].push(box);
-                placed[device.id].push({ y: (top + height / 2) * 100, h: height * 100, z: Z_FRONT - device.depth });
             });
-        });
-
-        /* Kabel verlegen, sobald alle Geräte ihre Position haben */
-        const slotOf = {};
-        const lanes = { net: 0, fc: 0, sas: 0 };
-        DEVICES.forEach((device) => {
-            device.ranges.forEach((range, ri) => {
-                const here = placed[device.id][ri];
-                const data = device.cables.filter((c) => c[0] !== 'pwr');
-                const power = device.cables.filter((c) => c[0] === 'pwr');
-                const spacing = Math.min(0.9, here.h / (Math.max(data.length, power.length) + 1));
-
-                data.forEach((cable, i) => {
-                    const type = cable[0];
-                    const dy = (i - (data.length - 1) / 2) * spacing;
-                    const from = { x: 11.8 + i * 1.7, y: here.y + dy, z: here.z };
-                    let lane;
-                    if (type === 'net') lane = 5.0 + (lanes.net++ % 9) * 0.5;
-                    else if (type === 'fc') lane = 7.2 + (lanes.fc++ % 7) * 0.35;
-                    else lane = 9.4 + (lanes.sas++ % 3) * 0.2;
-
-                    if (cable[1] === 'top') {
-                        dataCable(type, from, { x: lane, y: 1.5 }, lane);
-                        return;
-                    }
-                    const idx = Array.isArray(cable[2]) ? cable[2][ri] : cable[2] || 0;
-                    const target = placed[cable[1]][idx];
-                    const key = cable[1] + ':' + idx;
-                    const slot = (slotOf[key] = (slotOf[key] || 0) + 1);
-                    dataCable(type, from, { x: 13 + slot * 4.4, y: target.y, z: target.z }, lane);
-                });
-
-                const used = { r: 0, l: 0 };
-                power.forEach((cable, i) => {
-                    const side = cable[1];
-                    const dy = (i - (power.length - 1) / 2) * spacing;
-                    const x = side === 'r' ? 85.9 - used.r++ * 1.4 : 12.1 + used.l++ * 1.4;
-                    powerCable(side, { x: x, y: here.y + dy, z: here.z });
-                });
-            });
-        });
-
-        /* blaue Kabelbinder quer über die Netzwerkbahnen, schwarze über die Stromkabel */
-        [14, 22, 31, 41, 51, 61, 71, 80].forEach((y) => {
-            const tie = document.createElementNS(SVG_NS, 'rect');
-            tie.setAttribute('x', String(4.4 * PX));
-            tie.setAttribute('y', String(y * PY - 8));
-            tie.setAttribute('width', String(5.6 * PX));
-            tie.setAttribute('height', '16');
-            tie.setAttribute('rx', '5');
-            tie.setAttribute('fill', '#1f4cb0');
-            layers.net.appendChild(tie);
         });
 
         if (activeId) applyActive();
